@@ -21,12 +21,15 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import SpeedIcon from '@mui/icons-material/Speed';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { inquiryService } from '../../../shared/services/strapi';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 export const MotorsSellCarPage: React.FC = () => {
+  const { user, recordInquiry } = useAuth();
+
   const [formData, setFormData] = useState({
-    ownerName: '',
+    ownerName: user?.username || '',
     phone: '',
-    email: '',
+    email: user?.email || '',
     make: '',
     model: '',
     year: 2018,
@@ -37,6 +40,16 @@ export const MotorsSellCarPage: React.FC = () => {
     location: 'Nairobi',
     comments: '',
   });
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        ownerName: prev.ownerName || user.username,
+        email: prev.email || user.email,
+      }));
+    }
+  }, [user]);
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -56,14 +69,17 @@ export const MotorsSellCarPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await inquiryService.submitInquiry({
+      const payload = {
         customerName: formData.ownerName,
         phone: formData.phone,
         email: formData.email,
-        preferredContact: 'whatsapp',
-        inquiryType: 'sell_car',
+        preferredContact: 'whatsapp' as const,
+        inquiryType: 'sell_car' as const,
+        itemTitle: `Consignment: ${formData.year} ${formData.make} ${formData.model}`,
         message: `Sell/Consign Car Request: ${formData.year} ${formData.make} ${formData.model}, Mileage: ${formData.mileage} km, Asking: KES ${formData.expectedPrice}, City: ${formData.location}. Notes: ${formData.comments}`,
-      });
+      };
+      await inquiryService.submitInquiry(payload);
+      await recordInquiry(payload);
       setSubmitted(true);
     } catch {
       setError('Unable to submit your car details. Please reach out via WhatsApp.');

@@ -20,12 +20,15 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import PeopleIcon from '@mui/icons-material/People';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { inquiryService } from '../../../shared/services/strapi';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 export const PropertyListPropertyPage: React.FC = () => {
+  const { user, recordInquiry } = useAuth();
+
   const [formData, setFormData] = useState({
-    ownerName: '',
+    ownerName: user?.username || '',
     phone: '',
-    email: '',
+    email: user?.email || '',
     listingStatus: 'For Sale',
     propertyType: 'Apartment',
     title: '',
@@ -36,6 +39,16 @@ export const PropertyListPropertyPage: React.FC = () => {
     bathrooms: '2',
     description: '',
   });
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        ownerName: prev.ownerName || user.username,
+        email: prev.email || user.email,
+      }));
+    }
+  }, [user]);
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -55,14 +68,17 @@ export const PropertyListPropertyPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await inquiryService.submitInquiry({
+      const payload = {
         customerName: formData.ownerName,
         phone: formData.phone,
         email: formData.email,
-        preferredContact: 'whatsapp',
-        inquiryType: 'property_inquiry',
+        preferredContact: 'whatsapp' as const,
+        inquiryType: 'property_inquiry' as const,
+        itemTitle: `Listing: [${formData.listingStatus}] ${formData.propertyType} - ${formData.title}`,
         message: `Property Listing Request: [${formData.listingStatus}] ${formData.propertyType} - ${formData.title}. Location: ${formData.address}, ${formData.suburb}. Price: KES ${formData.price}. Beds: ${formData.bedrooms}, Baths: ${formData.bathrooms}. Details: ${formData.description}`,
-      });
+      };
+      await inquiryService.submitInquiry(payload);
+      await recordInquiry(payload);
       setSubmitted(true);
     } catch {
       setError('Unable to submit your listing request. Please contact us via WhatsApp.');

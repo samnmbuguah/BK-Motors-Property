@@ -126,3 +126,36 @@ export interface PropertyFilterState {
   titleType?: string;
   sortBy?: 'price_asc' | 'price_desc' | 'newest';
 }
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  provider?: string;
+  confirmed?: boolean;
+  blocked?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AuthResponse {
+  jwt: string;
+  user: User;
+}
+
+export type InquiryStatus = 'new' | 'in_progress' | 'contacted' | 'closed';
+
+export interface InquiryItem {
+  id: number | string;
+  customerName: string;
+  phone: string;
+  email?: string;
+  message: string;
+  preferredContact: 'whatsapp' | 'call' | 'email';
+  inquiryType: 'car_purchase' | 'test_drive' | 'sell_car' | 'property_viewing' | 'property_inquiry';
+  itemId?: string;
+  itemTitle?: string;
+  status: InquiryStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -12,6 +12,12 @@ import {
   ListItem,
   ListItemText,
   Badge,
+  Menu,
+  MenuItem,
+  Avatar,
+  Divider,
+  ListItemIcon,
+  Tooltip,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -21,18 +27,44 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { CurrencyToggle } from '../../../shared/components/CurrencyToggle';
 import { ShortlistDrawer } from '../../../shared/components/ShortlistDrawer';
 import { useFavorites } from '../../../shared/context/FavoritesContext';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 export const MotorsNavbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [shortlistOpen, setShortlistOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+
   const { favoriteCarIds } = useFavorites();
+  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const navigate = useNavigate();
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleNavigateDashboard = () => {
+    handleUserMenuClose();
+    navigate('/dashboard');
+  };
+
+  const handleLogout = () => {
+    handleUserMenuClose();
+    logout();
+  };
 
   const navLinks = [
     { label: 'Home', path: '/' },
@@ -147,11 +179,108 @@ export const MotorsNavbar: React.FC = () => {
                 ))}
 
                 {/* Shortlist Icon Button */}
-                <IconButton onClick={() => setShortlistOpen(true)} sx={{ color: '#0F172A', ml: 0.5 }}>
-                  <Badge badgeContent={favoriteCarIds.length} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: '#D97706' } }}>
-                    <FavoriteIcon sx={{ color: favoriteCarIds.length > 0 ? '#D97706' : '#94A3B8' }} />
-                  </Badge>
-                </IconButton>
+                <Tooltip title="View Saved Shortlist">
+                  <IconButton onClick={() => setShortlistOpen(true)} sx={{ color: '#0F172A', ml: 0.5 }}>
+                    <Badge badgeContent={favoriteCarIds.length} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: '#D97706' } }}>
+                      <FavoriteIcon sx={{ color: favoriteCarIds.length > 0 ? '#D97706' : '#94A3B8' }} />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+
+                {/* User Authentication Menu / Button */}
+                {isAuthenticated && user ? (
+                  <>
+                    <Button
+                      onClick={handleUserMenuOpen}
+                      startIcon={
+                        <Avatar
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            bgcolor: '#D97706',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {user.username.charAt(0).toUpperCase()}
+                        </Avatar>
+                      }
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        color: '#0F172A',
+                        ml: 1,
+                        px: 1.5,
+                        borderRadius: 2,
+                        border: '1px solid #E2E8F0',
+                        '&:hover': { bgcolor: '#F8FAFC' },
+                      }}
+                    >
+                      {user.username}
+                    </Button>
+                    <Menu
+                      anchorEl={userMenuAnchor}
+                      open={Boolean(userMenuAnchor)}
+                      onClose={handleUserMenuClose}
+                      PaperProps={{
+                        sx: {
+                          mt: 1.5,
+                          width: 220,
+                          borderRadius: 2,
+                          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                        },
+                      }}
+                      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    >
+                      <Box sx={{ px: 2, py: 1.5 }}>
+                        <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 600 }}>
+                          Signed in as
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }} noWrap>
+                          {user.email}
+                        </Typography>
+                      </Box>
+                      <Divider />
+                      <MenuItem onClick={handleNavigateDashboard}>
+                        <ListItemIcon>
+                          <DashboardIcon fontSize="small" sx={{ color: '#D97706' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="My Dashboard" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); setShortlistOpen(true); }}>
+                        <ListItemIcon>
+                          <FavoriteIcon fontSize="small" sx={{ color: '#D97706' }} />
+                        </ListItemIcon>
+                        <ListItemText primary={`Saved Shortlist (${favoriteCarIds.length})`} primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
+                      <Divider />
+                      <MenuItem onClick={handleLogout} sx={{ color: '#EF4444' }}>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize="small" sx={{ color: '#EF4444' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Sign Out" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
+                    </Menu>
+                  </>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    startIcon={<AccountCircleIcon />}
+                    onClick={() => openAuthModal('login')}
+                    sx={{
+                      ml: 1,
+                      borderColor: '#E2E8F0',
+                      color: '#0F172A',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      '&:hover': { borderColor: '#D97706', bgcolor: 'transparent' },
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                )}
 
                 <Button
                   variant="contained"
@@ -159,8 +288,11 @@ export const MotorsNavbar: React.FC = () => {
                   sx={{
                     bgcolor: '#0F172A',
                     color: '#FFFFFF',
-                    ml: 1.5,
+                    ml: 1,
                     px: 2.5,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderRadius: 2,
                     '&:hover': { bgcolor: '#1E293B' },
                   }}
                 >
@@ -191,10 +323,46 @@ export const MotorsNavbar: React.FC = () => {
 
       {/* Mobile Drawer */}
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 260, p: 2 }}>
-          <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: '#D97706' }}>
-            BK MOTORS
-          </Typography>
+        <Box sx={{ width: 280, p: 2.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+            <Box sx={{ bgcolor: '#D97706', color: '#FFFFFF', p: 0.6, borderRadius: 1.5 }}>
+              <DirectionsCarIcon fontSize="small" />
+            </Box>
+            <Typography variant="h6" fontWeight="bold" sx={{ color: '#0F172A' }}>
+              BK MOTORS
+            </Typography>
+          </Box>
+
+          {/* User Status in Mobile */}
+          {isAuthenticated && user ? (
+            <Box sx={{ p: 2, bgcolor: '#F8FAFC', borderRadius: 2, mb: 2 }}>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>Welcome</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{user.username}</Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                fullWidth
+                startIcon={<DashboardIcon />}
+                onClick={() => { setDrawerOpen(false); navigate('/dashboard'); }}
+                sx={{ mt: 1, textTransform: 'none', fontWeight: 700, color: '#D97706', borderColor: '#D97706' }}
+              >
+                My Dashboard
+              </Button>
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<AccountCircleIcon />}
+              onClick={() => { setDrawerOpen(false); openAuthModal('login'); }}
+              sx={{ mb: 2, bgcolor: '#0F172A', color: '#FFFFFF', textTransform: 'none', fontWeight: 700 }}
+            >
+              Sign In / Register
+            </Button>
+          )}
+
+          <Divider sx={{ mb: 1.5 }} />
+
           <List>
             {navLinks.map((link) => (
               <ListItem
@@ -202,12 +370,25 @@ export const MotorsNavbar: React.FC = () => {
                 component={RouterLink}
                 to={link.path}
                 onClick={() => setDrawerOpen(false)}
-                sx={{ textDecoration: 'none', color: '#0F172A' }}
+                sx={{ textDecoration: 'none', color: '#0F172A', py: 1 }}
               >
-                <ListItemText primary={link.label} />
+                <ListItemText primary={link.label} primaryTypographyProps={{ fontWeight: 600 }} />
               </ListItem>
             ))}
-            <ListItem sx={{ mt: 2 }}>
+
+            {isAuthenticated && (
+              <ListItem
+                onClick={() => { setDrawerOpen(false); logout(); }}
+                sx={{ color: '#EF4444', py: 1, cursor: 'pointer' }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <LogoutIcon fontSize="small" sx={{ color: '#EF4444' }} />
+                </ListItemIcon>
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ fontWeight: 600 }} />
+              </ListItem>
+            )}
+
+            <ListItem sx={{ mt: 2, px: 0 }}>
               <Button
                 fullWidth
                 variant="contained"
@@ -215,7 +396,7 @@ export const MotorsNavbar: React.FC = () => {
                   setDrawerOpen(false);
                   navigate('/sell');
                 }}
-                sx={{ bgcolor: '#D97706', color: '#FFFFFF' }}
+                sx={{ bgcolor: '#D97706', color: '#FFFFFF', fontWeight: 700, textTransform: 'none' }}
               >
                 Sell Your Car
               </Button>

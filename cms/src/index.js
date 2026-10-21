@@ -1,5 +1,6 @@
 'use strict';
 
+const bcrypt = require('bcryptjs');
 const seedData = require('./seedData');
 
 module.exports = {
@@ -57,7 +58,7 @@ module.exports = {
         strapi.log.info('Seeded Properties Agent: properties.agent@bkproperties.co.ke / AgentPassword2026!');
       }
 
-      // 3. Configure Public Permissions for API endpoints
+      // 3. Configure Public & Authenticated Permissions for API endpoints
       const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
         where: { type: 'public' },
       });
@@ -89,6 +90,122 @@ module.exports = {
           }
         }
         strapi.log.info('Public API permissions verified for cars, properties, and inquiries.');
+      }
+
+      const authRole = await strapi.query('plugin::users-permissions.role').findOne({
+        where: { type: 'authenticated' },
+      });
+
+      if (authRole) {
+        const authPermissions = [
+          { action: 'api::car.car.find' },
+          { action: 'api::car.car.findOne' },
+          { action: 'api::property.property.find' },
+          { action: 'api::property.property.findOne' },
+          { action: 'api::inquiry.inquiry.find' },
+          { action: 'api::inquiry.inquiry.findOne' },
+          { action: 'api::inquiry.inquiry.create' },
+          { action: 'plugin::users-permissions.user.me' },
+        ];
+
+        for (const perm of authPermissions) {
+          const existing = await strapi.query('plugin::users-permissions.permission').findOne({
+            where: {
+              role: authRole.id,
+              action: perm.action,
+            },
+          });
+
+          if (!existing) {
+            await strapi.query('plugin::users-permissions.permission').create({
+              data: {
+                role: authRole.id,
+                action: perm.action,
+              },
+            });
+          }
+        }
+        strapi.log.info('Authenticated API permissions verified.');
+      }
+
+      // 4. Create Seeded Client Customer Account
+      if (authRole) {
+        const hashedPassword = await bcrypt.hash('ClientPassword2026!', 10);
+        const existingClient = await strapi.query('plugin::users-permissions.user').findOne({
+          where: { email: 'customer@bkmotors.co.ke' },
+        });
+
+        if (!existingClient) {
+          await strapi.query('plugin::users-permissions.user').create({
+            data: {
+              username: 'davidmwangi',
+              email: 'customer@bkmotors.co.ke',
+              password: hashedPassword,
+              provider: 'local',
+              role: authRole.id,
+              confirmed: true,
+              blocked: false,
+            },
+          });
+          strapi.log.info('Default client created: customer@bkmotors.co.ke / ClientPassword2026!');
+        } else {
+          await strapi.query('plugin::users-permissions.user').update({
+            where: { id: existingClient.id },
+            data: {
+              password: hashedPassword,
+              provider: 'local',
+              confirmed: true,
+              blocked: false,
+            },
+          });
+        }
+      }
+
+      // 5. Seed Inquiries if none exist
+      const inquiryCount = await strapi.entityService.count('api::inquiry.inquiry');
+      if (inquiryCount === 0) {
+        const seedInquiries = [
+          {
+            customerName: 'David Mwangi',
+            email: 'customer@bkmotors.co.ke',
+            phone: '+254 712 345 678',
+            preferredContact: 'whatsapp',
+            inquiryType: 'test_drive',
+            itemId: '1',
+            itemTitle: '2020 Toyota Land Cruiser Prado TX-L',
+            message: 'Interested in weekend test drive along Ngong Road. Please confirm slot availability.',
+            status: 'contacted',
+          },
+          {
+            customerName: 'David Mwangi',
+            email: 'customer@bkmotors.co.ke',
+            phone: '+254 712 345 678',
+            preferredContact: 'call',
+            inquiryType: 'property_viewing',
+            itemId: '1',
+            itemTitle: '4-Bedroom Luxury Villa with Pool in Karen',
+            message: 'Requesting private walkthrough this Saturday afternoon around 2 PM.',
+            status: 'in_progress',
+          },
+          {
+            customerName: 'David Mwangi',
+            email: 'customer@bkmotors.co.ke',
+            phone: '+254 712 345 678',
+            preferredContact: 'whatsapp',
+            inquiryType: 'sell_car',
+            itemId: 'BKM-CONS-01',
+            itemTitle: 'Consignment: 2019 Subaru Outback 2.5i Eyesight',
+            message: 'Vehicle is ready for 150-point inspection and valuation at your hub.',
+            status: 'new',
+          },
+        ];
+
+        for (const inq of seedInquiries) {
+          await strapi.entityService.create('api::inquiry.inquiry', {
+            data: inq,
+          });
+        }
+        strapi.log.info(`Seeded ${seedInquiries.length} inquiries.`);
       }
 
       // 4. Seed Cars if none exist

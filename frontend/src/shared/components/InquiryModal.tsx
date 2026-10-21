@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -20,6 +20,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import { InquiryFormData } from '../types';
 import { inquiryService } from '../services/strapi';
+import { useAuth } from '../context/AuthContext';
 
 interface InquiryModalProps {
   open: boolean;
@@ -40,9 +41,11 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
   itemTitle,
   themeColor = '#D97706',
 }) => {
+  const { user, recordInquiry } = useAuth();
+
   const [formData, setFormData] = useState<InquiryFormData>({
-    customerName: '',
-    email: '',
+    customerName: user?.username || '',
+    email: user?.email || '',
     phone: '',
     message: itemTitle ? `I am interested in ${itemTitle}. Please provide further details.` : '',
     preferredContact: 'whatsapp',
@@ -50,6 +53,16 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     itemId,
     itemTitle,
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        customerName: prev.customerName || user.username,
+        email: prev.email || user.email,
+      }));
+    }
+  }, [user, open]);
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -68,10 +81,9 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     setLoading(true);
     setErrorMessage('');
     try {
-      const res = await inquiryService.submitInquiry(formData);
-      if (res.success) {
-        setSubmitted(true);
-      }
+      await inquiryService.submitInquiry(formData);
+      await recordInquiry(formData);
+      setSubmitted(true);
     } catch {
       setErrorMessage('Unable to send inquiry. Please reach out via WhatsApp or call us directly.');
     } finally {
