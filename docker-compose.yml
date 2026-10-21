@@ -1,0 +1,22 @@
+services:
+  bk-motors-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.motors
+    container_name: bk-motors-web
+    restart: unless-stopped
+    networks:
+      - caddy_default
+
+  bk-properties-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.properties
+    container_name: bk-properties-web
+    restart: unless-stopped
+    networks:
+      - caddy_default
+
+networks:
+  caddy_default:
+    external: true
