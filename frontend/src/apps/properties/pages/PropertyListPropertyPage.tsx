@@ -19,11 +19,16 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import PeopleIcon from '@mui/icons-material/People';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import Chip from '@mui/material/Chip';
+import { useNavigate } from 'react-router-dom';
 import { inquiryService } from '../../../shared/services/strapi';
 import { useAuth } from '../../../shared/context/AuthContext';
 
 export const PropertyListPropertyPage: React.FC = () => {
-  const { user, recordInquiry } = useAuth();
+  const { user, isAuthenticated, openAuthModal, recordInquiry } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     ownerName: user?.username || '',
@@ -143,29 +148,98 @@ export const PropertyListPropertyPage: React.FC = () => {
         </Grid>
 
         {/* Listing Form */}
-        <Card sx={{ maxWidth: 840, mx: 'auto', p: { xs: 3, md: 4 }, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0' }}>
+        <Card sx={{ maxWidth: 840, mx: 'auto', p: { xs: 3, md: 4 }, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <CardContent>
-            {submitted ? (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  Your property details have been received successfully!
-                </Alert>
-                <Typography variant="body1" color="text.secondary">
-                  Our listing manager will contact you within 2 hours to confirm details and schedule a free property photography & verification session.
+            {!isAuthenticated ? (
+              <Box sx={{ textAlign: 'center', py: 5, px: 2 }}>
+                <Box
+                  sx={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: '50%',
+                    bgcolor: '#DCFCE7',
+                    color: '#059669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2.5,
+                  }}
+                >
+                  <LockOutlinedIcon sx={{ fontSize: 36 }} />
+                </Box>
+                <Typography variant="h5" fontWeight="800" sx={{ mb: 1.5, color: '#0F172A' }}>
+                  Sign In Required to List a Property
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 540, mx: 'auto', mb: 3.5, lineHeight: 1.6 }}>
+                  To maintain verified land title standards, protect property owners, and give you live dashboard tracking of buyer viewing requests and valuation updates, please sign in or register your account.
                 </Typography>
                 <Button
-                  variant="outlined"
-                  onClick={() => setSubmitted(false)}
-                  sx={{ mt: 3, color: '#0D9488', borderColor: '#0D9488' }}
+                  variant="contained"
+                  size="large"
+                  onClick={() => openAuthModal('login')}
+                  sx={{
+                    bgcolor: '#059669',
+                    color: '#FFFFFF',
+                    fontWeight: 700,
+                    px: 4,
+                    py: 1.3,
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+                    '&:hover': { bgcolor: '#047857' },
+                  }}
                 >
-                  List Another Property
+                  Sign In / Register to List Property
                 </Button>
+              </Box>
+            ) : submitted ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
+                  Your property details have been received and linked directly to your client account!
+                </Alert>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  Our property listing manager (Sarah Wanjiku) will contact you within 2 hours to confirm title details and schedule an HD photography and drone session.
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => navigate('/dashboard')}
+                    sx={{
+                      bgcolor: '#064E3B',
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 3,
+                    }}
+                  >
+                    Track in My Dashboard
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setSubmitted(false)}
+                    sx={{ color: '#059669', borderColor: '#059669', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    List Another Property
+                  </Button>
+                </Box>
               </Box>
             ) : (
               <Box component="form" onSubmit={handleSubmit}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom>
-                  Property & Owner Information
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="h5" fontWeight="bold">
+                    Property & Owner Information
+                  </Typography>
+                  <Chip
+                    icon={<VerifiedUserIcon sx={{ fontSize: '15px !important', color: '#15803D !important' }} />}
+                    label={`Verified Client: ${user?.username}`}
+                    size="small"
+                    sx={{ bgcolor: '#DCFCE7', color: '#15803D', fontWeight: 700 }}
+                  />
+                </Box>
 
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 

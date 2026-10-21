@@ -65,6 +65,13 @@ export const PropertyNavbar: React.FC = () => {
     logout();
   };
 
+  const handleListPropertyNavigation = () => {
+    if (!isAuthenticated) {
+      openAuthModal('login');
+    }
+    navigate('/list');
+  };
+
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Properties For Sale', path: '/properties?status=For+Sale' },
@@ -284,7 +291,7 @@ export const PropertyNavbar: React.FC = () => {
 
                 <Button
                   variant="contained"
-                  onClick={() => navigate('/list')}
+                  onClick={handleListPropertyNavigation}
                   sx={{
                     bgcolor: '#0F172A',
                     color: '#FFFFFF',
@@ -394,7 +401,7 @@ export const PropertyNavbar: React.FC = () => {
                 variant="contained"
                 onClick={() => {
                   setDrawerOpen(false);
-                  navigate('/list');
+                  handleListPropertyNavigation();
                 }}
                 sx={{ bgcolor: '#0D9488', color: '#FFFFFF', fontWeight: 700, textTransform: 'none' }}
               >

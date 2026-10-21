@@ -66,6 +66,13 @@ export const MotorsNavbar: React.FC = () => {
     logout();
   };
 
+  const handleSellCarNavigation = () => {
+    if (!isAuthenticated) {
+      openAuthModal('login');
+    }
+    navigate('/sell');
+  };
+
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Inventory', path: '/inventory' },
@@ -284,7 +291,7 @@ export const MotorsNavbar: React.FC = () => {
 
                 <Button
                   variant="contained"
-                  onClick={() => navigate('/sell')}
+                  onClick={handleSellCarNavigation}
                   sx={{
                     bgcolor: '#0F172A',
                     color: '#FFFFFF',
@@ -394,7 +401,7 @@ export const MotorsNavbar: React.FC = () => {
                 variant="contained"
                 onClick={() => {
                   setDrawerOpen(false);
-                  navigate('/sell');
+                  handleSellCarNavigation();
                 }}
                 sx={{ bgcolor: '#D97706', color: '#FFFFFF', fontWeight: 700, textTransform: 'none' }}
               >

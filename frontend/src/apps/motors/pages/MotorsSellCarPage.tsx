@@ -15,16 +15,21 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  Chip,
 } from '@mui/material';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import SpeedIcon from '@mui/icons-material/Speed';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useNavigate } from 'react-router-dom';
 import { inquiryService } from '../../../shared/services/strapi';
 import { useAuth } from '../../../shared/context/AuthContext';
 
 export const MotorsSellCarPage: React.FC = () => {
-  const { user, recordInquiry } = useAuth();
+  const { user, isAuthenticated, openAuthModal, recordInquiry } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     ownerName: user?.username || '',
@@ -143,30 +148,99 @@ export const MotorsSellCarPage: React.FC = () => {
           </Grid>
         </Grid>
 
-        {/* Form */}
-        <Card sx={{ maxWidth: 800, mx: 'auto', p: { xs: 3, md: 4 }, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0' }}>
+        {/* Form Container */}
+        <Card sx={{ maxWidth: 800, mx: 'auto', p: { xs: 3, md: 4 }, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <CardContent>
-            {submitted ? (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  Your vehicle details have been received successfully!
-                </Alert>
-                <Typography variant="body1" color="text.secondary">
-                  Our appraisal manager will review your submission and contact you on WhatsApp / Phone within 2 business hours.
+            {!isAuthenticated ? (
+              <Box sx={{ textAlign: 'center', py: 5, px: 2 }}>
+                <Box
+                  sx={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: '50%',
+                    bgcolor: '#FEF3C7',
+                    color: '#D97706',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2.5,
+                  }}
+                >
+                  <LockOutlinedIcon sx={{ fontSize: 36 }} />
+                </Box>
+                <Typography variant="h5" fontWeight="800" sx={{ mb: 1.5, color: '#0F172A' }}>
+                  Sign In Required to Consign or Sell Your Car
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 540, mx: 'auto', mb: 3.5, lineHeight: 1.6 }}>
+                  To guarantee verified logbook transfers, secure escrow settlements, and allow you to track your 150-point inspection progress and buyer offers in real time, please log in or create a client account.
                 </Typography>
                 <Button
-                  variant="outlined"
-                  onClick={() => setSubmitted(false)}
-                  sx={{ mt: 3, color: '#D97706', borderColor: '#D97706' }}
+                  variant="contained"
+                  size="large"
+                  onClick={() => openAuthModal('login')}
+                  sx={{
+                    bgcolor: '#D97706',
+                    color: '#FFFFFF',
+                    fontWeight: 700,
+                    px: 4,
+                    py: 1.3,
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)',
+                    '&:hover': { bgcolor: '#B45309' },
+                  }}
                 >
-                  Submit Another Vehicle
+                  Sign In / Create Account to Continue
                 </Button>
+              </Box>
+            ) : submitted ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
+                  Your vehicle details have been received and logged directly into your client account!
+                </Alert>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  Our appraisal manager (James Kamau) will review your submission and contact you within 2 business hours for the physical 150-point inspection.
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => navigate('/dashboard')}
+                    sx={{
+                      bgcolor: '#0F172A',
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 3,
+                    }}
+                  >
+                    Track in My Dashboard
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setSubmitted(false)}
+                    sx={{ color: '#D97706', borderColor: '#D97706', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Submit Another Vehicle
+                  </Button>
+                </Box>
               </Box>
             ) : (
               <Box component="form" onSubmit={handleSubmit}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom>
-                  Vehicle & Contact Details
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="h5" fontWeight="bold">
+                    Vehicle & Appraisal Details
+                  </Typography>
+                  <Chip
+                    icon={<VerifiedIcon sx={{ fontSize: '15px !important', color: '#15803D !important' }} />}
+                    label={`Verified Client: ${user?.username}`}
+                    size="small"
+                    sx={{ bgcolor: '#DCFCE7', color: '#15803D', fontWeight: 700 }}
+                  />
+                </Box>
 
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
