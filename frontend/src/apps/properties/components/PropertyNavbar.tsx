@@ -30,6 +30,8 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { CurrencyToggle } from '../../../shared/components/CurrencyToggle';
 import { ShortlistDrawer } from '../../../shared/components/ShortlistDrawer';
@@ -255,6 +257,18 @@ export const PropertyNavbar: React.FC = () => {
                         </ListItemIcon>
                         <ListItemText primary="Client Portal" primaryTypographyProps={{ fontWeight: 600 }} />
                       </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard?tab=vault'); }}>
+                        <ListItemIcon>
+                          <DescriptionIcon fontSize="small" sx={{ color: '#0D9488' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Title Deeds & Vault" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard?tab=payments'); }}>
+                        <ListItemIcon>
+                          <AccountBalanceWalletIcon fontSize="small" sx={{ color: '#0D9488' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Escrow & Transactions" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
                       <MenuItem onClick={() => { handleUserMenuClose(); setShortlistOpen(true); }}>
                         <ListItemIcon>
                           <FavoriteIcon fontSize="small" sx={{ color: '#0D9488' }} />
@@ -354,6 +368,26 @@ export const PropertyNavbar: React.FC = () => {
                 sx={{ mt: 1, textTransform: 'none', fontWeight: 700, color: '#0D9488', borderColor: '#0D9488' }}
               >
                 My Account
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                fullWidth
+                startIcon={<DescriptionIcon />}
+                onClick={() => { setDrawerOpen(false); navigate('/dashboard?tab=vault'); }}
+                sx={{ mt: 0.5, textTransform: 'none', fontWeight: 600, color: '#0F172A', justifyContent: 'flex-start' }}
+              >
+                Title Deeds & Vault
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                fullWidth
+                startIcon={<AccountBalanceWalletIcon />}
+                onClick={() => { setDrawerOpen(false); navigate('/dashboard?tab=payments'); }}
+                sx={{ mt: 0.5, textTransform: 'none', fontWeight: 600, color: '#0F172A', justifyContent: 'flex-start' }}
+              >
+                Escrow & Transactions
               </Button>
             </Box>
           ) : (

@@ -37,7 +37,9 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { useNavigate } from 'react-router-dom';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -45,19 +47,69 @@ import { formatPrice } from '../utils/formatters';
 import { MOCK_CARS, MOCK_PROPERTIES } from '../services/mockData';
 import { Car, Property, InquiryItem } from '../types';
 import { AiOutreachDrawer } from './AiOutreachDrawer';
+import { DealerDocumentVault } from './DealerDocumentVault';
+import { TransactionTracker } from './TransactionTracker';
 
 interface ClientDashboardProps {
   portal: 'motors' | 'properties';
+  defaultTab?: string;
 }
 
-export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
+export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal, defaultTab }) => {
   const { user, logout, inquiries, openAuthModal, isAuthenticated } = useAuth();
   const { favoriteCarIds, favoritePropertyIds, toggleFavoriteCar, toggleFavoriteProperty } = useFavorites();
   const { currency, setCurrency } = useCurrency();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState(0);
+  const getTabIndexFromParam = (tabName: string | null): number => {
+    switch (tabName) {
+      case 'inquiries':
+      case 'bookings':
+        return 0;
+      case 'saved':
+      case 'shortlist':
+        return 1;
+      case 'consignments':
+      case 'listings':
+        return 2;
+      case 'vault':
+      case 'documents':
+      case 'dealer':
+        return 3;
+      case 'payments':
+      case 'transactions':
+      case 'escrow':
+        return 4;
+      case 'account':
+      case 'preferences':
+      case 'settings':
+        return 5;
+      default:
+        return 0;
+    }
+  };
+
+  const initialTab = defaultTab
+    ? getTabIndexFromParam(defaultTab)
+    : getTabIndexFromParam(searchParams.get('tab'));
+
+  const [activeTab, setActiveTab] = useState<number>(initialTab);
   const [selectedInquiryForAi, setSelectedInquiryForAi] = useState<InquiryItem | null>(null);
+
+  // Sync tab with URL search parameter if changed externally
+  React.useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      setActiveTab(getTabIndexFromParam(tabParam));
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (_: React.SyntheticEvent, newIndex: number) => {
+    setActiveTab(newIndex);
+    const tabNames = ['inquiries', 'saved', 'consignments', 'vault', 'payments', 'account'];
+    setSearchParams({ tab: tabNames[newIndex] }, { replace: true });
+  };
 
   const isMotors = portal === 'motors';
   const primaryColor = isMotors ? '#D97706' : '#059669';
@@ -304,7 +356,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
         <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <Tabs
             value={activeTab}
-            onChange={(_, val) => setActiveTab(val)}
+            onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
             TabIndicatorProps={{ sx: { bgcolor: primaryColor, height: 3 } }}
@@ -325,7 +377,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
             <Tab
               icon={<DirectionsCarIcon fontSize="small" />}
               iconPosition="start"
-              label={`Consignments & Sell Requests (${consignments.length})`}
+              label={`Consignments & Listings (${consignments.length})`}
+              sx={{ fontWeight: 700, textTransform: 'none', py: 2, '&.Mui-selected': { color: primaryColor } }}
+            />
+            <Tab
+              icon={<DescriptionIcon fontSize="small" />}
+              iconPosition="start"
+              label="Dealer Document Vault"
+              sx={{ fontWeight: 700, textTransform: 'none', py: 2, '&.Mui-selected': { color: primaryColor } }}
+            />
+            <Tab
+              icon={<AccountBalanceWalletIcon fontSize="small" />}
+              iconPosition="start"
+              label="Escrow & Transactions"
               sx={{ fontWeight: 700, textTransform: 'none', py: 2, '&.Mui-selected': { color: primaryColor } }}
             />
             <Tab
@@ -691,8 +755,22 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
               </Box>
             )}
 
-            {/* TAB 3: ACCOUNT & PREFERENCES */}
+            {/* TAB 3: DEALER DOCUMENT VAULT */}
             {activeTab === 3 && (
+              <Box>
+                <DealerDocumentVault portal={portal} />
+              </Box>
+            )}
+
+            {/* TAB 4: ESCROW & TRANSACTIONS */}
+            {activeTab === 4 && (
+              <Box>
+                <TransactionTracker portal={portal} />
+              </Box>
+            )}
+
+            {/* TAB 5: ACCOUNT & PREFERENCES */}
+            {activeTab === 5 && (
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
                   Account Profile & Portal Preferences

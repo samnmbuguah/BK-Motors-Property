@@ -159,3 +159,65 @@ export interface InquiryItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type DocumentType =
+  | 'logbook'
+  | 'title_deed'
+  | 'sales_agreement'
+  | 'inspection_certificate'
+  | 'id_copy'
+  | 'payment_receipt';
+
+export interface DealDocument {
+  id: string;
+  name: string;
+  type: DocumentType;
+  fileUrl: string;
+  fileSize: string;
+  verified: boolean;
+  verificationNotes?: string;
+  uploadedAt: string;
+  itemTitle?: string;
+}
+
+export type TransactionStatus = 'pending' | 'cleared' | 'held_in_escrow' | 'disbursed';
+export type TransactionType =
+  | 'booking_deposit'
+  | 'escrow_hold'
+  | 'bank_financing_disbursement'
+  | 'seller_final_payout';
+
+export interface PaymentTransaction {
+  id: string;
+  reference: string;
+  dealTitle: string;
+  amount: number;
+  currency: 'KES' | 'USD';
+  type: TransactionType;
+  status: TransactionStatus;
+  paymentMethod: 'M-PESA Paybill' | 'RTGS Bank Wire' | 'KCB Escrow' | 'Stanbic Asset Finance';
+  payerName: string;
+  recipientName: string;
+  timestamp: string;
+  receiptRef?: string;
+}
+
+export interface DealerConsignment {
+  id: string;
+  title: string;
+  itemType: 'vehicle' | 'property';
+  askingPrice: number;
+  currency: 'KES' | 'USD';
+  status:
+    | 'pending_inspection'
+    | 'inspected_verified'
+    | 'live_on_showroom'
+    | 'sale_in_progress'
+    | 'sold_paid';
+  photos: string[];
+  documents: DealDocument[];
+  transactions: PaymentTransaction[];
+  inspectionScore?: string;
+  createdAt: string;
+}
+

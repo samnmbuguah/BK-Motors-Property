@@ -111,6 +111,10 @@ export const App: React.FC = () => {
                       <Route path="/financing" element={<MotorsHomePage />} />
                       <Route path="/contact" element={<MotorsContactPage />} />
                       <Route path="/dashboard" element={<ClientDashboard portal="motors" />} />
+                      <Route path="/dealer" element={<ClientDashboard portal="motors" defaultTab="vault" />} />
+                      <Route path="/vault" element={<ClientDashboard portal="motors" defaultTab="vault" />} />
+                      <Route path="/transactions" element={<ClientDashboard portal="motors" defaultTab="payments" />} />
+                      <Route path="/escrow" element={<ClientDashboard portal="motors" defaultTab="payments" />} />
                       <Route path="/account" element={<Navigate to="/dashboard" replace />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
@@ -133,6 +137,10 @@ export const App: React.FC = () => {
                       <Route path="/list" element={<PropertyListPropertyPage />} />
                       <Route path="/contact" element={<PropertyContactPage />} />
                       <Route path="/dashboard" element={<ClientDashboard portal="properties" />} />
+                      <Route path="/dealer" element={<ClientDashboard portal="properties" defaultTab="vault" />} />
+                      <Route path="/vault" element={<ClientDashboard portal="properties" defaultTab="vault" />} />
+                      <Route path="/transactions" element={<ClientDashboard portal="properties" defaultTab="payments" />} />
+                      <Route path="/escrow" element={<ClientDashboard portal="properties" defaultTab="payments" />} />
                       <Route path="/account" element={<Navigate to="/dashboard" replace />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

@@ -31,6 +31,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { CurrencyToggle } from '../../../shared/components/CurrencyToggle';
 import { ShortlistDrawer } from '../../../shared/components/ShortlistDrawer';
@@ -255,6 +257,18 @@ export const MotorsNavbar: React.FC = () => {
                         </ListItemIcon>
                         <ListItemText primary="My Dashboard" primaryTypographyProps={{ fontWeight: 600 }} />
                       </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard?tab=vault'); }}>
+                        <ListItemIcon>
+                          <DescriptionIcon fontSize="small" sx={{ color: '#D97706' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Dealer Document Vault" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard?tab=payments'); }}>
+                        <ListItemIcon>
+                          <AccountBalanceWalletIcon fontSize="small" sx={{ color: '#D97706' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Escrow & Transactions" primaryTypographyProps={{ fontWeight: 600 }} />
+                      </MenuItem>
                       <MenuItem onClick={() => { handleUserMenuClose(); setShortlistOpen(true); }}>
                         <ListItemIcon>
                           <FavoriteIcon fontSize="small" sx={{ color: '#D97706' }} />
@@ -354,6 +368,26 @@ export const MotorsNavbar: React.FC = () => {
                 sx={{ mt: 1, textTransform: 'none', fontWeight: 700, color: '#D97706', borderColor: '#D97706' }}
               >
                 My Dashboard
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                fullWidth
+                startIcon={<DescriptionIcon />}
+                onClick={() => { setDrawerOpen(false); navigate('/dashboard?tab=vault'); }}
+                sx={{ mt: 0.5, textTransform: 'none', fontWeight: 600, color: '#0F172A', justifyContent: 'flex-start' }}
+              >
+                Dealer Vault & Logbooks
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                fullWidth
+                startIcon={<AccountBalanceWalletIcon />}
+                onClick={() => { setDrawerOpen(false); navigate('/dashboard?tab=payments'); }}
+                sx={{ mt: 0.5, textTransform: 'none', fontWeight: 600, color: '#0F172A', justifyContent: 'flex-start' }}
+              >
+                Escrow & Transactions
               </Button>
             </Box>
           ) : (
