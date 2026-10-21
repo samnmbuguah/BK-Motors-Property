@@ -25,27 +25,31 @@ import { useSearchParams } from 'react-router-dom';
 import { Property, PropertyFilterState } from '../../../shared/types';
 import { propertyService } from '../../../shared/services/strapi';
 import { PropertyCard } from '../components/PropertyCard';
-import { formatPrice } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
 
 const PROPERTY_TYPES = ['All Types', 'Apartment', 'Villa', 'Townhouse', 'Penthouse', 'Land/Plot', 'Commercial'];
 const SUBURBS = ['All Locations', 'Karen', 'Kilimani', 'Westlands', 'Kileleshwa', 'Lavington', 'Runda', 'Ngong Road'];
 const STATUSES = ['All Statuses', 'For Sale', 'For Rent'];
+const TITLE_TYPES = ['All Titles', 'Freehold', 'Leasehold (99 Yrs)', 'Leasehold (50 Yrs)'];
 
 export const PropertyListingsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { formatAmount } = useCurrency();
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const initialType = searchParams.get('type') || undefined;
   const [filters, setFilters] = useState<PropertyFilterState>({
     searchTerm: searchParams.get('search') || '',
     listingStatus: searchParams.get('status') || undefined,
-    propertyType: searchParams.get('type') || undefined,
+    propertyType: initialType,
     suburb: searchParams.get('suburb') || undefined,
     minBedrooms: searchParams.get('beds') ? Number(searchParams.get('beds')) : undefined,
+    titleType: undefined,
     sortBy: 'newest',
   });
 
@@ -58,6 +62,8 @@ export const PropertyListingsPage: React.FC = () => {
     });
   }, []);
 
+  const isLandSelected = filters.propertyType === 'Land/Plot' || filters.propertyType === 'Land';
+
   const resetFilters = () => {
     setFilters({
       searchTerm: '',
@@ -65,6 +71,7 @@ export const PropertyListingsPage: React.FC = () => {
       propertyType: undefined,
       suburb: undefined,
       minBedrooms: undefined,
+      titleType: undefined,
       sortBy: 'newest',
     });
     setPriceRange([100000, 200000000]);
@@ -87,15 +94,21 @@ export const PropertyListingsPage: React.FC = () => {
           return false;
         }
 
-        if (filters.propertyType && filters.propertyType !== 'All Types' && prop.propertyType !== filters.propertyType) {
-          return false;
+        if (filters.propertyType && filters.propertyType !== 'All Types') {
+          const isTargetLand = filters.propertyType === 'Land/Plot' || filters.propertyType === 'Land';
+          const isPropLand = prop.propertyType === 'Land/Plot' || prop.propertyType === ('Land' as any);
+          if (isTargetLand) {
+            if (!isPropLand) return false;
+          } else if (prop.propertyType !== filters.propertyType) {
+            return false;
+          }
         }
 
         if (filters.suburb && filters.suburb !== 'All Locations' && prop.location.suburb !== filters.suburb) {
           return false;
         }
 
-        if (filters.minBedrooms !== undefined && (prop.bedrooms === undefined || prop.bedrooms < filters.minBedrooms)) {
+        if (!isLandSelected && filters.minBedrooms !== undefined && (prop.bedrooms === undefined || prop.bedrooms < filters.minBedrooms)) {
           return false;
         }
 
@@ -110,7 +123,7 @@ export const PropertyListingsPage: React.FC = () => {
         if (filters.sortBy === 'price_desc') return b.price - a.price;
         return 0;
       });
-  }, [properties, filters, priceRange]);
+  }, [properties, filters, priceRange, isLandSelected]);
 
   const FilterSidebarContent = (
     <Card sx={{ bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 3, p: 2.5 }}>
@@ -133,7 +146,7 @@ export const PropertyListingsPage: React.FC = () => {
         <TextField
           size="small"
           label="Search Keywords"
-          placeholder="e.g. Garden, Penthouse..."
+          placeholder="e.g. Karen, Red Soil, Pool..."
           value={filters.searchTerm || ''}
           onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
         />
@@ -158,9 +171,9 @@ export const PropertyListingsPage: React.FC = () => {
 
         {/* Property Type */}
         <FormControl size="small" fullWidth>
-          <InputLabel>Type</InputLabel>
+          <InputLabel>Category</InputLabel>
           <Select
-            label="Type"
+            label="Category"
             value={filters.propertyType || 'All Types'}
             onChange={(e) =>
               setFilters({ ...filters, propertyType: e.target.value === 'All Types' ? undefined : e.target.value })
@@ -174,7 +187,7 @@ export const PropertyListingsPage: React.FC = () => {
           </Select>
         </FormControl>
 
-        {/* Suburb */}
+        {/* Location / Suburb */}
         <FormControl size="small" fullWidth>
           <InputLabel>Location</InputLabel>
           <Select
@@ -192,29 +205,48 @@ export const PropertyListingsPage: React.FC = () => {
           </Select>
         </FormControl>
 
-        {/* Min Bedrooms */}
-        <FormControl size="small" fullWidth>
-          <InputLabel>Min Bedrooms</InputLabel>
-          <Select
-            label="Min Bedrooms"
-            value={filters.minBedrooms !== undefined ? filters.minBedrooms : 'Any'}
-            onChange={(e) =>
-              setFilters({ ...filters, minBedrooms: e.target.value === 'Any' ? undefined : Number(e.target.value) })
-            }
-          >
-            <MenuItem value="Any">Any</MenuItem>
-            <MenuItem value={1}>1+ Bedrooms</MenuItem>
-            <MenuItem value={2}>2+ Bedrooms</MenuItem>
-            <MenuItem value={3}>3+ Bedrooms</MenuItem>
-            <MenuItem value={4}>4+ Bedrooms</MenuItem>
-            <MenuItem value={5}>5+ Bedrooms</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Context Filter: If Land Selected -> Show Title Type; Else Show Bedrooms */}
+        {isLandSelected ? (
+          <FormControl size="small" fullWidth>
+            <InputLabel>Title Deed Type</InputLabel>
+            <Select
+              label="Title Deed Type"
+              value={filters.titleType || 'All Titles'}
+              onChange={(e) =>
+                setFilters({ ...filters, titleType: e.target.value === 'All Titles' ? undefined : e.target.value })
+              }
+            >
+              {TITLE_TYPES.map((tt) => (
+                <MenuItem key={tt} value={tt}>
+                  {tt}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+          <FormControl size="small" fullWidth>
+            <InputLabel>Min Bedrooms</InputLabel>
+            <Select
+              label="Min Bedrooms"
+              value={filters.minBedrooms !== undefined ? filters.minBedrooms : 'Any'}
+              onChange={(e) =>
+                setFilters({ ...filters, minBedrooms: e.target.value === 'Any' ? undefined : Number(e.target.value) })
+              }
+            >
+              <MenuItem value="Any">Any Beds</MenuItem>
+              <MenuItem value={1}>1+ Bedrooms</MenuItem>
+              <MenuItem value={2}>2+ Bedrooms</MenuItem>
+              <MenuItem value={3}>3+ Bedrooms</MenuItem>
+              <MenuItem value={4}>4+ Bedrooms</MenuItem>
+              <MenuItem value={5}>5+ Bedrooms</MenuItem>
+            </Select>
+          </FormControl>
+        )}
 
         {/* Price Slider */}
         <Box>
           <Typography variant="caption" fontWeight="600" color="text.secondary">
-            Budget Range: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+            Budget Range: {formatAmount(priceRange[0])} - {formatAmount(priceRange[1])}
           </Typography>
           <Slider
             value={priceRange}
@@ -235,10 +267,10 @@ export const PropertyListingsPage: React.FC = () => {
         {/* Header */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="overline" color="#0D9488" fontWeight="700">
-            PROPERTY DIRECTORY
+            {isLandSelected ? 'LAND & DEVELOPMENT PLOTS' : 'PROPERTY DIRECTORY'}
           </Typography>
           <Typography variant="h4" fontWeight="800">
-            Current Property Portfolio ({filteredProperties.length})
+            {isLandSelected ? 'Commercial & Residential Land Catalog' : 'Current Property Portfolio'} ({filteredProperties.length})
           </Typography>
         </Box>
 
@@ -262,7 +294,7 @@ export const PropertyListingsPage: React.FC = () => {
               onClick={() => setDrawerOpen(true)}
               sx={{ borderColor: '#CBD5E1', color: '#0F172A' }}
             >
-              Filter Properties
+              Filter Options
             </Button>
           ) : (
             <Typography variant="body2" color="text.secondary">

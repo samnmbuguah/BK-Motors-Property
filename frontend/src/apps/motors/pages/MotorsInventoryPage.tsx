@@ -27,7 +27,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Car, CarFilterState } from '../../../shared/types';
 import { carService } from '../../../shared/services/strapi';
 import { VehicleCard } from '../components/VehicleCard';
-import { formatPrice } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
 
 const MAKES = ['All Makes', 'Toyota', 'Subaru', 'Mercedes-Benz', 'Mazda', 'Land Rover', 'Isuzu', 'Nissan', 'Honda'];
 const BODY_TYPES = ['All Types', 'SUV', 'Sedan', 'Pickup', 'Hatchback', 'Station Wagon'];
@@ -39,6 +39,7 @@ export const MotorsInventoryPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { formatAmount } = useCurrency();
 
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +188,7 @@ export const MotorsInventoryPage: React.FC = () => {
         {/* Price Slider */}
         <Box>
           <Typography variant="caption" fontWeight="600" color="text.secondary">
-            Price Range: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+            Price Range: {formatAmount(priceRange[0])} - {formatAmount(priceRange[1])}
           </Typography>
           <Slider
             value={priceRange}

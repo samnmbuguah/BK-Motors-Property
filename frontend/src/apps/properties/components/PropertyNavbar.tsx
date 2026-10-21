@@ -11,6 +11,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Badge,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -19,18 +20,25 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { CurrencyToggle } from '../../../shared/components/CurrencyToggle';
+import { ShortlistDrawer } from '../../../shared/components/ShortlistDrawer';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 
 export const PropertyNavbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [shortlistOpen, setShortlistOpen] = useState(false);
+  const { favoritePropertyIds } = useFavorites();
   const navigate = useNavigate();
 
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Properties For Sale', path: '/properties?status=For+Sale' },
     { label: 'Properties For Rent', path: '/properties?status=For+Rent' },
+    { label: 'Land & Plots', path: '/properties?type=Land%2FPlot' },
     { label: 'List Property', path: '/list' },
     { label: 'Contact', path: '/contact' },
   ];
@@ -50,10 +58,11 @@ export const PropertyNavbar: React.FC = () => {
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <CurrencyToggle size="small" />
             <Box
               component="a"
               href="tel:+254711000000"
-              sx={{ color: '#E2E8F0', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}
+              sx={{ color: '#E2E8F0', textDecoration: 'none', display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 0.5 }}
             >
               <PhoneIcon sx={{ fontSize: 14, color: '#0D9488' }} />
               <span>+254 711 000 000</span>
@@ -129,7 +138,7 @@ export const PropertyNavbar: React.FC = () => {
                     sx={{
                       color: '#334155',
                       fontWeight: 600,
-                      px: 2,
+                      px: 1.8,
                       py: 1,
                       '&:hover': { color: '#0D9488', bgcolor: 'transparent' },
                     }}
@@ -137,6 +146,14 @@ export const PropertyNavbar: React.FC = () => {
                     {link.label}
                   </Button>
                 ))}
+
+                {/* Shortlist Icon Button */}
+                <IconButton onClick={() => setShortlistOpen(true)} sx={{ color: '#0F172A', ml: 0.5 }}>
+                  <Badge badgeContent={favoritePropertyIds.length} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: '#0D9488' } }}>
+                    <FavoriteIcon sx={{ color: favoritePropertyIds.length > 0 ? '#0D9488' : '#94A3B8' }} />
+                  </Badge>
+                </IconButton>
+
                 <Button
                   variant="contained"
                   onClick={() => navigate('/list')}
@@ -148,20 +165,30 @@ export const PropertyNavbar: React.FC = () => {
                     '&:hover': { bgcolor: '#1E293B' },
                   }}
                 >
-                  List Your Property
+                  List Property
                 </Button>
               </Box>
             )}
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Actions */}
             {isMobile && (
-              <IconButton onClick={() => setDrawerOpen(true)} color="inherit">
-                <MenuIcon />
-              </IconButton>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <IconButton onClick={() => setShortlistOpen(true)} size="small">
+                  <Badge badgeContent={favoritePropertyIds.length} color="primary">
+                    <FavoriteIcon sx={{ fontSize: 22, color: favoritePropertyIds.length > 0 ? '#0D9488' : '#64748B' }} />
+                  </Badge>
+                </IconButton>
+                <IconButton onClick={() => setDrawerOpen(true)} color="inherit">
+                  <MenuIcon />
+                </IconButton>
+              </Box>
             )}
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* Shortlist Drawer */}
+      <ShortlistDrawer open={shortlistOpen} onClose={() => setShortlistOpen(false)} portal="properties" />
 
       {/* Mobile Drawer */}
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>

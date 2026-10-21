@@ -9,15 +9,20 @@ import {
   Button,
   Stack,
   Divider,
+  IconButton,
 } from '@mui/material';
 import SpeedIcon from '@mui/icons-material/Speed';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import SettingsIcon from '@mui/icons-material/Settings';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from 'react-router-dom';
 import { Car } from '../../../shared/types';
-import { formatPrice, formatMileage, createWhatsAppLink } from '../../../shared/utils/formatters';
+import { formatMileage, createWhatsAppLink } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 
 interface VehicleCardProps {
   car: Car;
@@ -25,6 +30,10 @@ interface VehicleCardProps {
 
 export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
   const navigate = useNavigate();
+  const { formatAmount } = useCurrency();
+  const { isCarFavorite, toggleFavoriteCar } = useFavorites();
+
+  const isFavorited = isCarFavorite(car.id);
 
   const conditionColors: Record<string, { bg: string; text: string }> = {
     'Foreign Used': { bg: '#EFF6FF', text: '#1D4ED8' },
@@ -35,7 +44,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
 
   const badge = conditionColors[car.condition] || { bg: '#F1F5F9', text: '#475569' };
 
-  const whatsAppText = `Hello BK Motors, I am inquiring about the ${car.year} ${car.make} ${car.model} (Ref: ${car.refNumber}) listed at ${formatPrice(car.price, car.currency)}. Is it still available?`;
+  const whatsAppText = `Hello BK Motors, I am inquiring about the ${car.year} ${car.make} ${car.model} (Ref: ${car.refNumber}) listed at ${formatAmount(car.price)}. Is it still available?`;
   const whatsappUrl = createWhatsAppLink('+254700000000', whatsAppText);
 
   return (
@@ -82,6 +91,30 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
             />
           )}
         </Box>
+
+        {/* Favorite Button */}
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavoriteCar(car.id);
+          }}
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            p: 0.8,
+            '&:hover': { bgcolor: '#FFFFFF', transform: 'scale(1.1)' },
+          }}
+        >
+          {isFavorited ? (
+            <FavoriteIcon sx={{ color: '#EF4444', fontSize: 20 }} />
+          ) : (
+            <FavoriteBorderIcon sx={{ color: '#64748B', fontSize: 20 }} />
+          )}
+        </IconButton>
+
         <Chip
           label={car.bodyType}
           size="small"
@@ -133,7 +166,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
         </Typography>
 
         <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', mb: 1.5 }}>
-          {formatPrice(car.price, car.currency)}
+          {formatAmount(car.price)}
         </Typography>
 
         {/* Specs Grid */}

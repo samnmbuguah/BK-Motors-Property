@@ -72,6 +72,20 @@ export interface Property {
   featured?: boolean;
   readyStatus: PropertyReadyStatus;
   description: string;
+
+  // Land / Plot specific attributes
+  plotSizeAcres?: number;
+  plotDimensions?: string; // e.g. "50 x 100 ft", "1/4 Acre", "1 Acre"
+  titleType?: 'Freehold' | 'Leasehold (99 Yrs)' | 'Leasehold (50 Yrs)' | 'Sectional Title';
+  zoning?: 'Residential' | 'Commercial' | 'Agricultural' | 'Mixed-Use High Rise';
+  soilType?: 'Red Soil' | 'Black Cotton' | 'Sandy Loam';
+  topography?: 'Flat' | 'Gentle Slope' | 'Valley View';
+
+  // Rental specific attributes
+  furnishingStatus?: 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
+  serviceChargeMonthly?: number;
+  serviceChargeInclusive?: boolean;
+  depositTerms?: string;
 }
 
 export interface InquiryFormData {
@@ -108,5 +122,7 @@ export interface PropertyFilterState {
   minPrice?: number;
   maxPrice?: number;
   searchTerm?: string;
+  landSizeCategory?: string;
+  titleType?: string;
   sortBy?: 'price_asc' | 'price_desc' | 'newest';
 }

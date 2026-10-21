@@ -9,15 +9,23 @@ import {
   Button,
   Stack,
   Divider,
+  IconButton,
 } from '@mui/material';
 import BedIcon from '@mui/icons-material/Bed';
 import BathtubIcon from '@mui/icons-material/Bathtub';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LandscapeIcon from '@mui/icons-material/Landscape';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import BusinessIcon from '@mui/icons-material/Business';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '../../../shared/types';
-import { formatPrice, createWhatsAppLink } from '../../../shared/utils/formatters';
+import { createWhatsAppLink } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 
 interface PropertyCardProps {
   property: Property;
@@ -25,11 +33,16 @@ interface PropertyCardProps {
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   const navigate = useNavigate();
+  const { formatAmount } = useCurrency();
+  const { isPropertyFavorite, toggleFavoriteProperty } = useFavorites();
 
+  const isFavorited = isPropertyFavorite(property.id);
   const isSale = property.listingStatus === 'For Sale';
+  const isLand = property.propertyType === 'Land/Plot' || property.propertyType === ('Land' as any);
+
   const statusColor = isSale ? { bg: '#CCFBF1', text: '#0F766E' } : { bg: '#EFF6FF', text: '#1D4ED8' };
 
-  const whatsAppMessage = `Hello BK Properties, I would like to inquire about "${property.title}" (${property.refNumber}) listed at ${formatPrice(property.price, property.currency)}. Can I schedule a viewing?`;
+  const whatsAppMessage = `Hello BK Properties, I would like to inquire about "${property.title}" (${property.refNumber}) listed at ${formatAmount(property.price)}. Can I schedule a viewing?`;
   const whatsappUrl = createWhatsAppLink('+254711000000', whatsAppMessage);
 
   return (
@@ -78,6 +91,29 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           )}
         </Box>
 
+        {/* Favorite Button */}
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavoriteProperty(property.id);
+          }}
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            p: 0.8,
+            '&:hover': { bgcolor: '#FFFFFF', transform: 'scale(1.1)' },
+          }}
+        >
+          {isFavorited ? (
+            <FavoriteIcon sx={{ color: '#EF4444', fontSize: 20 }} />
+          ) : (
+            <FavoriteBorderIcon sx={{ color: '#64748B', fontSize: 20 }} />
+          )}
+        </IconButton>
+
         <Chip
           label={property.propertyType}
           size="small"
@@ -122,7 +158,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         </Typography>
 
         <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', mb: 2 }}>
-          {formatPrice(property.price, property.currency)}
+          {formatAmount(property.price)}
           {!isSale && (
             <Typography component="span" variant="caption" sx={{ color: 'text.secondary', ml: 0.5 }}>
               / month
@@ -130,41 +166,75 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           )}
         </Typography>
 
-        {/* Specs Pill Box */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            bgcolor: '#F8FAFC',
-            p: 1.2,
-            borderRadius: 1.5,
-            mb: 2,
-            fontSize: '0.8rem',
-            color: '#475569',
-          }}
-        >
-          {property.bedrooms !== undefined && (
+        {/* Dynamic Context-Aware Specs Pill Box */}
+        {isLand ? (
+          /* LAND SPECIFIC METRICS */
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              bgcolor: '#F0FDF4',
+              p: 1.2,
+              borderRadius: 1.5,
+              mb: 2,
+              fontSize: '0.78rem',
+              color: '#166534',
+              border: '1px solid #DCFCE7',
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              <BedIcon sx={{ fontSize: 18, color: '#0D9488' }} />
-              <span>{property.bedrooms} Beds</span>
+              <LandscapeIcon sx={{ fontSize: 17, color: '#0D9488' }} />
+              <span>{property.plotDimensions || '0.75 Acre'}</span>
             </Box>
-          )}
 
-          {property.bathrooms !== undefined && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              <BathtubIcon sx={{ fontSize: 18, color: '#0D9488' }} />
-              <span>{property.bathrooms} Baths</span>
+              <VerifiedIcon sx={{ fontSize: 16, color: '#0D9488' }} />
+              <span>{property.titleType || 'Freehold Title'}</span>
             </Box>
-          )}
 
-          {property.areaSqFt !== undefined && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              <SquareFootIcon sx={{ fontSize: 18, color: '#0D9488' }} />
-              <span>{property.areaSqFt.toLocaleString()} sq ft</span>
+              <BusinessIcon sx={{ fontSize: 16, color: '#0D9488' }} />
+              <span>{property.zoning || 'Commercial'}</span>
             </Box>
-          )}
-        </Box>
+          </Box>
+        ) : (
+          /* RESIDENTIAL / COMMERCIAL METRICS */
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              bgcolor: '#F8FAFC',
+              p: 1.2,
+              borderRadius: 1.5,
+              mb: 2,
+              fontSize: '0.8rem',
+              color: '#475569',
+            }}
+          >
+            {property.bedrooms !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                <BedIcon sx={{ fontSize: 18, color: '#0D9488' }} />
+                <span>{property.bedrooms} Beds</span>
+              </Box>
+            )}
+
+            {property.bathrooms !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                <BathtubIcon sx={{ fontSize: 18, color: '#0D9488' }} />
+                <span>{property.bathrooms} Baths</span>
+              </Box>
+            )}
+
+            {property.areaSqFt !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                <SquareFootIcon sx={{ fontSize: 18, color: '#0D9488' }} />
+                <span>{property.areaSqFt.toLocaleString()} sq ft</span>
+              </Box>
+            )}
+          </Box>
+        )}
 
         {/* Buttons */}
         <Box sx={{ mt: 'auto' }}>

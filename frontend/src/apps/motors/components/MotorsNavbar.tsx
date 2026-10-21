@@ -11,6 +11,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Badge,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -19,12 +20,18 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { CurrencyToggle } from '../../../shared/components/CurrencyToggle';
+import { ShortlistDrawer } from '../../../shared/components/ShortlistDrawer';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 
 export const MotorsNavbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [shortlistOpen, setShortlistOpen] = useState(false);
+  const { favoriteCarIds } = useFavorites();
   const navigate = useNavigate();
 
   const navLinks = [
@@ -50,10 +57,11 @@ export const MotorsNavbar: React.FC = () => {
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <CurrencyToggle size="small" />
             <Box
               component="a"
               href="tel:+254700000000"
-              sx={{ color: '#E2E8F0', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5 }}
+              sx={{ color: '#E2E8F0', textDecoration: 'none', display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 0.5 }}
             >
               <PhoneIcon sx={{ fontSize: 14, color: '#D97706' }} />
               <span>+254 700 000 000</span>
@@ -137,6 +145,14 @@ export const MotorsNavbar: React.FC = () => {
                     {link.label}
                   </Button>
                 ))}
+
+                {/* Shortlist Icon Button */}
+                <IconButton onClick={() => setShortlistOpen(true)} sx={{ color: '#0F172A', ml: 0.5 }}>
+                  <Badge badgeContent={favoriteCarIds.length} color="primary" sx={{ '& .MuiBadge-badge': { bgcolor: '#D97706' } }}>
+                    <FavoriteIcon sx={{ color: favoriteCarIds.length > 0 ? '#D97706' : '#94A3B8' }} />
+                  </Badge>
+                </IconButton>
+
                 <Button
                   variant="contained"
                   onClick={() => navigate('/sell')}
@@ -155,13 +171,23 @@ export const MotorsNavbar: React.FC = () => {
 
             {/* Mobile Menu Icon */}
             {isMobile && (
-              <IconButton onClick={() => setDrawerOpen(true)} color="inherit">
-                <MenuIcon />
-              </IconButton>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <IconButton onClick={() => setShortlistOpen(true)} size="small">
+                  <Badge badgeContent={favoriteCarIds.length} color="primary">
+                    <FavoriteIcon sx={{ fontSize: 22, color: favoriteCarIds.length > 0 ? '#D97706' : '#64748B' }} />
+                  </Badge>
+                </IconButton>
+                <IconButton onClick={() => setDrawerOpen(true)} color="inherit">
+                  <MenuIcon />
+                </IconButton>
+              </Box>
             )}
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* Shortlist Drawer */}
+      <ShortlistDrawer open={shortlistOpen} onClose={() => setShortlistOpen(false)} portal="motors" />
 
       {/* Mobile Drawer */}
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>

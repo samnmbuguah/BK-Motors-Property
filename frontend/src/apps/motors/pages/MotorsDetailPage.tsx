@@ -7,7 +7,6 @@ import {
   Button,
   Chip,
   Card,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -17,6 +16,7 @@ import {
   Breadcrumbs,
   Link,
   CircularProgress,
+  IconButton,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
@@ -27,16 +27,22 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Car } from '../../../shared/types';
 import { carService } from '../../../shared/services/strapi';
-import { formatPrice, formatMileage, createWhatsAppLink } from '../../../shared/utils/formatters';
+import { formatMileage, createWhatsAppLink } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 import { FinancingCalculator } from '../components/FinancingCalculator';
 import { InquiryModal } from '../../../shared/components/InquiryModal';
 
 export const MotorsDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { formatAmount } = useCurrency();
+  const { isCarFavorite, toggleFavoriteCar } = useFavorites();
 
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +85,8 @@ export const MotorsDetailPage: React.FC = () => {
     );
   }
 
-  const whatsAppText = `Hello BK Motors, I would like to inquire about the ${car.year} ${car.make} ${car.model} (${car.refNumber}) priced at ${formatPrice(car.price, car.currency)}. Is it available for viewing?`;
+  const isFavorited = isCarFavorite(car.id);
+  const whatsAppText = `Hello BK Motors, I would like to inquire about the ${car.year} ${car.make} ${car.model} (${car.refNumber}) priced at ${formatAmount(car.price)}. Is it available for viewing?`;
   const whatsappUrl = createWhatsAppLink('+254700000000', whatsAppText);
 
   return (
@@ -110,17 +117,27 @@ export const MotorsDetailPage: React.FC = () => {
 
         {/* Title Header */}
         <Box sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
             <Chip label={car.condition} color="primary" size="small" sx={{ fontWeight: 700 }} />
             <Chip label={`Ref: ${car.refNumber}`} variant="outlined" size="small" />
             <Chip label={car.status} size="small" sx={{ bgcolor: '#ECFDF5', color: '#047857', fontWeight: 600 }} />
           </Stack>
-          <Typography variant="h4" fontWeight="800">
-            {car.title}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mt: 0.5 }}>
-            <LocationOnIcon sx={{ fontSize: 18, color: '#D97706' }} />
-            <Typography variant="body2">{car.location}</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h4" fontWeight="800">
+                {car.title}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mt: 0.5 }}>
+                <LocationOnIcon sx={{ fontSize: 18, color: '#D97706' }} />
+                <Typography variant="body2">{car.location}</Typography>
+              </Box>
+            </Box>
+            <IconButton
+              onClick={() => toggleFavoriteCar(car.id)}
+              sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, p: 1.2 }}
+            >
+              {isFavorited ? <FavoriteIcon sx={{ color: '#EF4444' }} /> : <FavoriteBorderIcon sx={{ color: '#64748B' }} />}
+            </IconButton>
           </Box>
         </Box>
 
@@ -221,10 +238,10 @@ export const MotorsDetailPage: React.FC = () => {
                 Cash Price (Negotiable)
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 800, color: '#0F172A', my: 1 }}>
-                {formatPrice(car.price, car.currency)}
+                {formatAmount(car.price)}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Asset financing available from approx. <strong>{formatPrice(Math.round(car.price * 0.026))}/mo</strong>
+                Asset financing available from approx. <strong>{formatAmount(Math.round(car.price * 0.026))}/mo</strong>
               </Typography>
 
               <Stack spacing={1.5}>
@@ -386,7 +403,7 @@ export const MotorsDetailPage: React.FC = () => {
             )}
           </Grid>
 
-          {/* Financing Calculator for this specific vehicle */}
+          {/* Financing Calculator */}
           <Grid item xs={12} md={5}>
             <FinancingCalculator initialPrice={car.price} onApply={() => setModalOpen(true)} />
           </Grid>

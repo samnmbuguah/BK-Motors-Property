@@ -12,7 +12,8 @@ import {
 } from '@mui/material';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import { calculateMonthlyPayment, formatPrice } from '../../../shared/utils/formatters';
+import { calculateMonthlyPayment } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
 
 interface FinancingCalculatorProps {
   initialPrice?: number;
@@ -23,6 +24,7 @@ export const FinancingCalculator: React.FC<FinancingCalculatorProps> = ({
   initialPrice = 4500000,
   onApply,
 }) => {
+  const { formatAmount } = useCurrency();
   const [price, setPrice] = useState<number>(initialPrice);
   const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
   const [tenureMonths, setTenureMonths] = useState<number>(48);
@@ -42,7 +44,7 @@ export const FinancingCalculator: React.FC<FinancingCalculatorProps> = ({
               Car Loan & Financing Calculator
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Estimate your monthly payments with Kenyan commercial bank asset financing
+              Estimate your monthly payments with commercial bank asset financing
             </Typography>
           </Box>
         </Box>
@@ -70,7 +72,7 @@ export const FinancingCalculator: React.FC<FinancingCalculatorProps> = ({
                   Down Payment (Deposit): {downPaymentPercent}%
                 </Typography>
                 <Typography variant="caption" fontWeight="bold" color="primary">
-                  {formatPrice(result.downPaymentAmount)}
+                  {formatAmount(result.downPaymentAmount)}
                 </Typography>
               </Box>
               <Slider
@@ -140,7 +142,7 @@ export const FinancingCalculator: React.FC<FinancingCalculatorProps> = ({
                 Estimated Monthly Installment
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 800, color: '#FBBF24', my: 1 }}>
-                {formatPrice(result.monthlyPayment)}
+                {formatAmount(result.monthlyPayment)}
                 <Typography component="span" variant="body2" sx={{ color: '#94A3B8', ml: 1 }}>
                   / month
                 </Typography>
@@ -151,15 +153,15 @@ export const FinancingCalculator: React.FC<FinancingCalculatorProps> = ({
               <Stack spacing={1.2} sx={{ fontSize: '0.85rem' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1' }}>
                   <span>Required Deposit:</span>
-                  <strong style={{ color: '#FFFFFF' }}>{formatPrice(result.downPaymentAmount)}</strong>
+                  <strong style={{ color: '#FFFFFF' }}>{formatAmount(result.downPaymentAmount)}</strong>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1' }}>
                   <span>Financed Amount:</span>
-                  <strong style={{ color: '#FFFFFF' }}>{formatPrice(result.loanAmount)}</strong>
+                  <strong style={{ color: '#FFFFFF' }}>{formatAmount(result.loanAmount)}</strong>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1' }}>
                   <span>Estimated Total Interest:</span>
-                  <strong style={{ color: '#FFFFFF' }}>{formatPrice(result.totalInterest)}</strong>
+                  <strong style={{ color: '#FFFFFF' }}>{formatAmount(result.totalInterest)}</strong>
                 </Box>
               </Stack>
             </Box>

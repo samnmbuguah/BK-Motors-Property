@@ -7,13 +7,17 @@ import {
   Button,
   Chip,
   Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   Divider,
   Stack,
   Breadcrumbs,
   Link,
   CircularProgress,
   Slider,
-  TextField,
+  IconButton,
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -25,15 +29,24 @@ import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalculateIcon from '@mui/icons-material/Calculate';
+import LandscapeIcon from '@mui/icons-material/Landscape';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import BusinessIcon from '@mui/icons-material/Business';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Property } from '../../../shared/types';
 import { propertyService } from '../../../shared/services/strapi';
-import { formatPrice, createWhatsAppLink, calculateMonthlyPayment } from '../../../shared/utils/formatters';
+import { createWhatsAppLink, calculateMonthlyPayment } from '../../../shared/utils/formatters';
+import { useCurrency } from '../../../shared/context/CurrencyContext';
+import { useFavorites } from '../../../shared/context/FavoritesContext';
 import { InquiryModal } from '../../../shared/components/InquiryModal';
 
 export const PropertyDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { formatAmount } = useCurrency();
+  const { isPropertyFavorite, toggleFavoriteProperty } = useFavorites();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +93,9 @@ export const PropertyDetailPage: React.FC = () => {
     );
   }
 
+  const isFavorited = isPropertyFavorite(property.id);
   const isSale = property.listingStatus === 'For Sale';
+  const isLand = property.propertyType === 'Land/Plot' || property.propertyType === ('Land' as any);
   const mortgageResult = calculateMonthlyPayment(property.price, downPercent, interestRate, loanTenureYears * 12);
 
   const whatsAppMessage = `Hello BK Properties, I would like to schedule a private viewing for "${property.title}" (Ref: ${property.refNumber}).`;
@@ -114,7 +129,7 @@ export const PropertyDetailPage: React.FC = () => {
 
         {/* Title Header */}
         <Box sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
             <Chip
               label={property.listingStatus}
               size="small"
@@ -122,15 +137,28 @@ export const PropertyDetailPage: React.FC = () => {
             />
             <Chip label={property.propertyType} variant="outlined" size="small" />
             <Chip label={`Ref: ${property.refNumber}`} size="small" sx={{ bgcolor: '#F1F5F9', color: '#475569' }} />
+            {isLand && (
+              <Chip label="Clean Title Deed" size="small" sx={{ bgcolor: '#FEF3C7', color: '#B45309', fontWeight: 700 }} />
+            )}
           </Stack>
-          <Typography variant="h4" fontWeight="800">
-            {property.title}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mt: 0.5 }}>
-            <LocationOnIcon sx={{ fontSize: 18, color: '#0D9488' }} />
-            <Typography variant="body2">
-              {property.location.address}, {property.location.suburb}, {property.location.county}
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h4" fontWeight="800">
+                {property.title}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mt: 0.5 }}>
+                <LocationOnIcon sx={{ fontSize: 18, color: '#0D9488' }} />
+                <Typography variant="body2">
+                  {property.location.address}, {property.location.suburb}, {property.location.county}
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton
+              onClick={() => toggleFavoriteProperty(property.id)}
+              sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, p: 1.2 }}
+            >
+              {isFavorited ? <FavoriteIcon sx={{ color: '#EF4444' }} /> : <FavoriteBorderIcon sx={{ color: '#64748B' }} />}
+            </IconButton>
           </Box>
         </Box>
 
@@ -177,59 +205,105 @@ export const PropertyDetailPage: React.FC = () => {
               </Stack>
             )}
 
-            {/* Key Specs Row */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' },
-                gap: 2,
-                bgcolor: '#FFFFFF',
-                p: 2.5,
-                borderRadius: 3,
-                border: '1px solid #E2E8F0',
-                mt: 3,
-              }}
-            >
-              {property.bedrooms !== undefined && (
+            {/* Context-Aware Key Specs Row */}
+            {isLand ? (
+              /* LAND SPECIFIC SUMMARY */
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' },
+                  gap: 2,
+                  bgcolor: '#F0FDF4',
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid #DCFCE7',
+                  mt: 3,
+                }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <BedIcon sx={{ color: '#0D9488' }} />
+                  <LandscapeIcon sx={{ color: '#0D9488' }} />
                   <Box>
-                    <Typography variant="caption" color="text.secondary">Bedrooms</Typography>
-                    <Typography variant="subtitle2" fontWeight="700">{property.bedrooms} Beds</Typography>
+                    <Typography variant="caption" color="text.secondary">Plot Area</Typography>
+                    <Typography variant="subtitle2" fontWeight="700">0.75 Acre / 32,670 sq ft</Typography>
                   </Box>
                 </Box>
-              )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <VerifiedIcon sx={{ color: '#0D9488' }} />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Title Deed</Typography>
+                    <Typography variant="subtitle2" fontWeight="700">Clean Freehold</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <BusinessIcon sx={{ color: '#0D9488' }} />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Zoning</Typography>
+                    <Typography variant="subtitle2" fontWeight="700">Commercial High-Rise</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocationOnIcon sx={{ color: '#0D9488' }} />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Road Frontage</Typography>
+                    <Typography variant="subtitle2" fontWeight="700">45m Highway Front</Typography>
+                  </Box>
+                </Box>
+              </Box>
+            ) : (
+              /* RESIDENTIAL / COMMERCIAL SUMMARY */
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' },
+                  gap: 2,
+                  bgcolor: '#FFFFFF',
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid #E2E8F0',
+                  mt: 3,
+                }}
+              >
+                {property.bedrooms !== undefined && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BedIcon sx={{ color: '#0D9488' }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Bedrooms</Typography>
+                      <Typography variant="subtitle2" fontWeight="700">{property.bedrooms} Beds</Typography>
+                    </Box>
+                  </Box>
+                )}
 
-              {property.bathrooms !== undefined && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <BathtubIcon sx={{ color: '#0D9488' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Bathrooms</Typography>
-                    <Typography variant="subtitle2" fontWeight="700">{property.bathrooms} Baths</Typography>
+                {property.bathrooms !== undefined && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BathtubIcon sx={{ color: '#0D9488' }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Bathrooms</Typography>
+                      <Typography variant="subtitle2" fontWeight="700">{property.bathrooms} Baths</Typography>
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
 
-              {property.areaSqFt !== undefined && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <SquareFootIcon sx={{ color: '#0D9488' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Floor Area</Typography>
-                    <Typography variant="subtitle2" fontWeight="700">{property.areaSqFt.toLocaleString()} sq ft</Typography>
+                {property.areaSqFt !== undefined && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SquareFootIcon sx={{ color: '#0D9488' }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Floor Area</Typography>
+                      <Typography variant="subtitle2" fontWeight="700">{property.areaSqFt.toLocaleString()} sq ft</Typography>
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
 
-              {property.parkingSpaces !== undefined && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <LocalParkingIcon sx={{ color: '#0D9488' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Parking</Typography>
-                    <Typography variant="subtitle2" fontWeight="700">{property.parkingSpaces} Cars</Typography>
+                {property.parkingSpaces !== undefined && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LocalParkingIcon sx={{ color: '#0D9488' }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Parking</Typography>
+                      <Typography variant="subtitle2" fontWeight="700">{property.parkingSpaces} Cars</Typography>
+                    </Box>
                   </Box>
-                </Box>
-              )}
-            </Box>
+                )}
+              </Box>
+            )}
           </Grid>
 
           {/* Pricing & Booking Sidebar */}
@@ -239,7 +313,7 @@ export const PropertyDetailPage: React.FC = () => {
                 {isSale ? 'Guide Price' : 'Monthly Rental'}
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 800, color: '#0F172A', my: 1 }}>
-                {formatPrice(property.price, property.currency)}
+                {formatAmount(property.price)}
                 {!isSale && (
                   <Typography component="span" variant="body1" sx={{ color: 'text.secondary', ml: 1 }}>
                     / month
@@ -247,7 +321,13 @@ export const PropertyDetailPage: React.FC = () => {
                 )}
               </Typography>
 
-              <Stack spacing={1.5} sx={{ mt: 3 }}>
+              {!isSale && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                  * Service Charge: Inclusive | Furnished: Ready Turnkey
+                </Typography>
+              )}
+
+              <Stack spacing={1.5} sx={{ mt: 2 }}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -262,7 +342,7 @@ export const PropertyDetailPage: React.FC = () => {
                     '&:hover': { bgcolor: '#0F766E' },
                   }}
                 >
-                  Schedule Private Viewing
+                  {isLand ? 'Schedule Land Site Visit' : 'Schedule Private Viewing'}
                 </Button>
 
                 <Button
@@ -294,35 +374,101 @@ export const PropertyDetailPage: React.FC = () => {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CheckCircleIcon sx={{ fontSize: 16, color: '#0D9488' }} />
-                  <span>Ready for immediate occupation / transfer</span>
+                  <span>Ready for immediate conveyance / transfer</span>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CheckCircleIcon sx={{ fontSize: 16, color: '#0D9488' }} />
-                  <span>Mortgage pre-approved with top Kenyan banks</span>
+                  <span>Bank financing & diaspora escrow approved</span>
                 </Box>
               </Box>
             </Card>
           </Grid>
         </Grid>
 
-        {/* Detailed Description & Amenities */}
+        {/* Detailed Description & Land / Property Specs Table */}
         <Grid container spacing={4} sx={{ mb: 6 }}>
           <Grid item xs={12} md={7}>
             {/* Description */}
             <Card sx={{ p: 3, mb: 4, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0' }}>
               <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Property Description & Features
+                Property Description & Highlights
               </Typography>
               <Typography variant="body1" sx={{ color: '#334155', lineHeight: 1.8 }}>
                 {property.description}
               </Typography>
             </Card>
 
+            {/* Context Specifications Table */}
+            <Card sx={{ p: 3, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', mb: 4 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                {isLand ? 'Land Due Diligence & Zoning Facts' : 'Property Architectural Details'}
+              </Typography>
+              <Table size="small">
+                <TableBody>
+                  {isLand ? (
+                    <>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Property Category</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Prime Development Land</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Plot Size</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>0.75 Acre (32,670 sq ft)</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Title Deed Registry</TableCell>
+                        <TableCell>Nairobi Lands Registry (Freehold)</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Zoning Approval</TableCell>
+                        <TableCell>Commercial / Mixed-Use High Rise</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Topography</TableCell>
+                        <TableCell>Flat Red Soil Ground</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Road Access</TableCell>
+                        <TableCell>Direct Dual Carriageway Highway</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Utilities On Site</TableCell>
+                        <TableCell>3-Phase KPLC Power & Municipal Sewer</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Beacons / Survey</TableCell>
+                        <TableCell>Deed Plan & Survey Beacons Intact</TableCell>
+                      </TableRow>
+                    </>
+                  ) : (
+                    <>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Property Type</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>{property.propertyType}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Listing Status</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>{property.listingStatus}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Bedrooms</TableCell>
+                        <TableCell>{property.bedrooms || 'Studio / Commercial'}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Bathrooms</TableCell>
+                        <TableCell>{property.bathrooms || 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Internal Area</TableCell>
+                        <TableCell>{property.areaSqFt ? `${property.areaSqFt.toLocaleString()} sq ft` : 'Custom'}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Parking Capacity</TableCell>
+                        <TableCell>{property.parkingSpaces ? `${property.parkingSpaces} Reserved Slots` : 'Ample'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Occupation Status</TableCell>
+                        <TableCell>{property.readyStatus}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>County / Suburb</TableCell>
+                        <TableCell>{property.location.suburb}, {property.location.county}</TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+
             {/* Amenities Grid */}
             {property.amenities.length > 0 && (
               <Card sx={{ p: 3, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0' }}>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  Amenities & Facilities
+                  {isLand ? 'Infrastructure & Utilities' : 'Amenities & Facilities'}
                 </Typography>
                 <Grid container spacing={1.5} sx={{ mt: 1 }}>
                   {property.amenities.map((amenity) => (
@@ -338,8 +484,8 @@ export const PropertyDetailPage: React.FC = () => {
             )}
           </Grid>
 
-          {/* Mortgage Estimator (For Sale properties) */}
-          {isSale && (
+          {/* Mortgage Estimator (Only for houses/apartments for sale) */}
+          {isSale && !isLand && (
             <Grid item xs={12} md={5}>
               <Card sx={{ p: 3, borderRadius: 3, bgcolor: '#FFFFFF', border: '1px solid #E2E8F0' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -363,7 +509,7 @@ export const PropertyDetailPage: React.FC = () => {
                         Down Payment: {downPercent}%
                       </Typography>
                       <Typography variant="caption" fontWeight="bold" sx={{ color: '#0D9488' }}>
-                        {formatPrice(mortgageResult.downPaymentAmount)}
+                        {formatAmount(mortgageResult.downPaymentAmount)}
                       </Typography>
                     </Box>
                     <Slider
@@ -403,13 +549,13 @@ export const PropertyDetailPage: React.FC = () => {
                       Estimated Monthly Repayment
                     </Typography>
                     <Typography variant="h4" sx={{ fontWeight: 800, color: '#2DD4BF', my: 0.5 }}>
-                      {formatPrice(mortgageResult.monthlyPayment)}
+                      {formatAmount(mortgageResult.monthlyPayment)}
                       <Typography component="span" variant="caption" sx={{ color: '#94A3B8', ml: 1 }}>
                         / month
                       </Typography>
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#94A3B8', display: 'block', mt: 1 }}>
-                      Loan Principal: {formatPrice(mortgageResult.loanAmount)}
+                      Loan Principal: {formatAmount(mortgageResult.loanAmount)}
                     </Typography>
                   </Box>
                 </Stack>
@@ -422,7 +568,7 @@ export const PropertyDetailPage: React.FC = () => {
         <InquiryModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          title="Schedule a Private Property Tour"
+          title={isLand ? 'Schedule Land Site Visit & Beacon Verification' : 'Schedule Private Property Tour'}
           inquiryType="property_viewing"
           itemId={property.id}
           itemTitle={property.title}

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 
+// Context Providers
+import { CurrencyProvider } from './shared/context/CurrencyContext';
+import { FavoritesProvider } from './shared/context/FavoritesContext';
+
 // Motors App
 import { motorsTheme } from './apps/motors/theme';
 import { MotorsNavbar } from './apps/motors/components/MotorsNavbar';
@@ -79,55 +83,59 @@ export const App: React.FC = () => {
   const currentTheme = activePortal === 'motors' ? motorsTheme : propertyTheme;
 
   return (
-    <ThemeProvider theme={currentTheme}>
-      <CssBaseline />
-      <PortalSwitcher currentPortal={activePortal} onSwitch={handlePortalSwitch} />
+    <CurrencyProvider>
+      <FavoritesProvider>
+        <ThemeProvider theme={currentTheme}>
+          <CssBaseline />
+          <PortalSwitcher currentPortal={activePortal} onSwitch={handlePortalSwitch} />
 
-      <BrowserRouter>
-        {activePortal === 'motors' ? (
-          // BK MOTORS APP
-          <div className="portal-motors" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <MotorsNavbar />
-            <main style={{ flexGrow: 1 }}>
-              <Routes>
-                <Route path="/" element={<MotorsHomePage />} />
-                <Route path="/inventory" element={<MotorsInventoryPage />} />
-                <Route path="/vehicle/:slug" element={<MotorsDetailPage />} />
-                <Route path="/sell" element={<MotorsSellCarPage />} />
-                <Route path="/financing" element={<MotorsHomePage />} />
-                <Route path="/contact" element={<MotorsContactPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <MotorsFooter />
-            <WhatsAppButton
-              phone="+254700000000"
-              defaultMessage="Hello BK Motors Kenya, I would like to make an inquiry."
-            />
-          </div>
-        ) : (
-          // BK PROPERTIES APP
-          <div className="portal-properties" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <PropertyNavbar />
-            <main style={{ flexGrow: 1 }}>
-              <Routes>
-                <Route path="/" element={<PropertyHomePage />} />
-                <Route path="/properties" element={<PropertyListingsPage />} />
-                <Route path="/property/:slug" element={<PropertyDetailPage />} />
-                <Route path="/list" element={<PropertyListPropertyPage />} />
-                <Route path="/contact" element={<PropertyContactPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <PropertyFooter />
-            <WhatsAppButton
-              phone="+254711000000"
-              defaultMessage="Hello BK Properties Kenya, I would like to inquire about real estate listings."
-            />
-          </div>
-        )}
-      </BrowserRouter>
-    </ThemeProvider>
+          <BrowserRouter>
+            {activePortal === 'motors' ? (
+              // BK MOTORS APP
+              <div className="portal-motors" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <MotorsNavbar />
+                <main style={{ flexGrow: 1 }}>
+                  <Routes>
+                    <Route path="/" element={<MotorsHomePage />} />
+                    <Route path="/inventory" element={<MotorsInventoryPage />} />
+                    <Route path="/vehicle/:slug" element={<MotorsDetailPage />} />
+                    <Route path="/sell" element={<MotorsSellCarPage />} />
+                    <Route path="/financing" element={<MotorsHomePage />} />
+                    <Route path="/contact" element={<MotorsContactPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+                <MotorsFooter />
+                <WhatsAppButton
+                  phone="+254700000000"
+                  defaultMessage="Hello BK Motors Kenya, I would like to make an inquiry."
+                />
+              </div>
+            ) : (
+              // BK PROPERTIES APP
+              <div className="portal-properties" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <PropertyNavbar />
+                <main style={{ flexGrow: 1 }}>
+                  <Routes>
+                    <Route path="/" element={<PropertyHomePage />} />
+                    <Route path="/properties" element={<PropertyListingsPage />} />
+                    <Route path="/property/:slug" element={<PropertyDetailPage />} />
+                    <Route path="/list" element={<PropertyListPropertyPage />} />
+                    <Route path="/contact" element={<PropertyContactPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+                <PropertyFooter />
+                <WhatsAppButton
+                  phone="+254711000000"
+                  defaultMessage="Hello BK Properties Kenya, I would like to inquire about real estate listings."
+                />
+              </div>
+            )}
+          </BrowserRouter>
+        </ThemeProvider>
+      </FavoritesProvider>
+    </CurrencyProvider>
   );
 };
 export default App;
