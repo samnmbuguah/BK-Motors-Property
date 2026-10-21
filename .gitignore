@@ -42,3 +42,9 @@ build/
 *.njsproj
 *.sln
 *.sw?
+
+# Strapi cache
+cms/.strapi/
+cms/.strapi-updater.json
+cms/.tmp/
+cms/build/

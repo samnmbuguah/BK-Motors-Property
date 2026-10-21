@@ -69,12 +69,11 @@
     },
     "bodyType": {
       "type": "enumeration",
-      "enum": ["SUV", "Sedan", "Hatchback", "Pickup", "Station Wagon", "Coupe", "Van"],
+      "enum": ["SUV", "Sedan", "Hatchback", "Pickup", "StationWagon", "Coupe", "Van"],
       "default": "SUV"
     },
     "driveType": {
-      "type": "enumeration",
-      "enum": ["4WD", "AWD", "2WD", "FWD", "RWD"],
+      "type": "string",
       "default": "4WD"
     },
     "exteriorColor": {
@@ -85,8 +84,8 @@
     },
     "condition": {
       "type": "enumeration",
-      "enum": ["Foreign Used", "Locally Used", "Brand New", "In Transit"],
-      "default": "Foreign Used"
+      "enum": ["ForeignUsed", "LocallyUsed", "BrandNew", "InTransit"],
+      "default": "ForeignUsed"
     },
     "status": {
       "type": "enumeration",

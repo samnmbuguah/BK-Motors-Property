@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Car, Property, InquiryFormData } from '../types';
 import { MOCK_CARS, MOCK_PROPERTIES } from './mockData';
 
-const STRAPI_URL = import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = import.meta.env.VITE_STRAPI_URL || 'https://bkapi.169-58-102-217.sslip.io';
 const apiClient = axios.create({
   baseURL: `${STRAPI_URL}/api`,
   timeout: 5000,
@@ -19,7 +19,6 @@ export const carService = {
         return res.data.data.map((item: any) => normalizeCar(item));
       }
     } catch (err) {
-      // Strapi offline or endpoint not yet configured, seamlessly return curated mock data
       console.warn('Notice: Strapi offline or not reachable. Using local catalog data.', err);
     }
     return MOCK_CARS;
@@ -102,6 +101,23 @@ function normalizeCar(item: any): Car {
     images = attrs.images;
   }
 
+  // Fallback to rich curated unsplash photos if none uploaded yet
+  if (images.length === 0) {
+    const matchingMock = MOCK_CARS.find((c) => c.slug === attrs.slug || c.refNumber === attrs.refNumber);
+    if (matchingMock && matchingMock.images.length > 0) {
+      images = matchingMock.images;
+    } else {
+      images = ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800'];
+    }
+  }
+
+  const conditionMap: Record<string, any> = {
+    ForeignUsed: 'Foreign Used',
+    LocallyUsed: 'Locally Used',
+    BrandNew: 'Brand New',
+    InTransit: 'In Transit',
+  };
+
   return {
     id: item.id || attrs.id,
     title: attrs.title,
@@ -111,23 +127,23 @@ function normalizeCar(item: any): Car {
     model: attrs.model,
     year: attrs.year,
     trim: attrs.trim,
-    price: attrs.price,
+    price: Number(attrs.price),
     currency: attrs.currency || 'KES',
     mileage: attrs.mileage,
     engineCC: attrs.engineCC,
     transmission: attrs.transmission,
     fuelType: attrs.fuelType,
     bodyType: attrs.bodyType,
-    driveType: attrs.driveType,
+    driveType: attrs.driveType || '4WD',
     exteriorColor: attrs.exteriorColor,
     interiorColor: attrs.interiorColor,
-    condition: attrs.condition,
+    condition: conditionMap[attrs.condition] || attrs.condition || 'Foreign Used',
     status: attrs.status || 'Available',
     featured: Boolean(attrs.featured),
     description: attrs.description,
     features: Array.isArray(attrs.features) ? attrs.features : [],
-    images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800'],
-    location: attrs.location || 'Nairobi, Kenya',
+    images,
+    location: attrs.location || 'Nairobi Showroom (Ngong Road)',
     vin: attrs.vin,
   };
 }
@@ -145,14 +161,34 @@ function normalizeProperty(item: any): Property {
     images = attrs.images;
   }
 
+  if (images.length === 0) {
+    const matchingMock = MOCK_PROPERTIES.find((p) => p.slug === attrs.slug || p.refNumber === attrs.refNumber);
+    if (matchingMock && matchingMock.images.length > 0) {
+      images = matchingMock.images;
+    } else {
+      images = ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'];
+    }
+  }
+
+  const statusMap: Record<string, any> = {
+    ForSale: 'For Sale',
+    ForRent: 'For Rent',
+  };
+
+  const readyMap: Record<string, any> = {
+    Ready: 'Ready',
+    UnderConstruction: 'Under Construction',
+    OffPlan: 'Off-Plan',
+  };
+
   return {
     id: item.id || attrs.id,
     title: attrs.title,
     slug: attrs.slug,
     refNumber: attrs.refNumber || `BKP-${item.id}`,
-    propertyType: attrs.propertyType,
-    listingStatus: attrs.listingStatus,
-    price: attrs.price,
+    propertyType: attrs.propertyType === 'Land' ? 'Land/Plot' : attrs.propertyType,
+    listingStatus: statusMap[attrs.listingStatus] || attrs.listingStatus || 'For Sale',
+    price: Number(attrs.price),
     currency: attrs.currency || 'KES',
     bedrooms: attrs.bedrooms,
     bathrooms: attrs.bathrooms,
@@ -160,9 +196,9 @@ function normalizeProperty(item: any): Property {
     parkingSpaces: attrs.parkingSpaces,
     location: attrs.location || { address: 'Nairobi', suburb: 'Nairobi', county: 'Nairobi', country: 'Kenya' },
     amenities: Array.isArray(attrs.amenities) ? attrs.amenities : [],
-    images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'],
+    images,
     featured: Boolean(attrs.featured),
-    readyStatus: attrs.readyStatus || 'Ready',
+    readyStatus: readyMap[attrs.readyStatus] || attrs.readyStatus || 'Ready',
     description: attrs.description,
   };
 }

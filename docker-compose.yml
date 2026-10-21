@@ -17,6 +17,21 @@ services:
     networks:
       - caddy_default
 
+  bk-strapi-api:
+    image: node:22-slim
+    container_name: bk-strapi-api
+    restart: unless-stopped
+    working_dir: /opt/monorepo/cms
+    volumes:
+      - .:/opt/monorepo
+    command: node server.js
+    environment:
+      - NODE_ENV=development
+      - PORT=1337
+      - NODE_PATH=/opt/monorepo/node_modules
+    networks:
+      - caddy_default
+
 networks:
   caddy_default:
     external: true

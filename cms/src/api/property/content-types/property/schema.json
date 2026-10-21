@@ -33,7 +33,7 @@
         "Villa",
         "Townhouse",
         "Mansion",
-        "Land/Plot",
+        "Land",
         "Commercial",
         "Penthouse"
       ],
@@ -41,8 +41,8 @@
     },
     "listingStatus": {
       "type": "enumeration",
-      "enum": ["For Sale", "For Rent"],
-      "default": "For Sale"
+      "enum": ["ForSale", "ForRent"],
+      "default": "ForSale"
     },
     "price": {
       "type": "decimal",
@@ -83,7 +83,7 @@
     },
     "readyStatus": {
       "type": "enumeration",
-      "enum": ["Ready", "Under Construction", "Off-Plan"],
+      "enum": ["Ready", "UnderConstruction", "OffPlan"],
       "default": "Ready"
     },
     "description": {
