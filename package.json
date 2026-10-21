@@ -17,7 +17,12 @@
     "preview": "npm --prefix frontend run preview",
     "cms:dev": "npm --prefix cms run develop",
     "cms:build": "npm --prefix cms run build",
-    "cms:start": "npm --prefix cms run start"
+    "cms:start": "npm --prefix cms run start",
+    "ai:dev": "cd ai-service && uvicorn app.main:app --reload --port 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samnmbuguah/BK-Motors-Property.git"
   },
   "keywords": [
     "motors",
@@ -25,10 +30,14 @@
     "real-estate",
     "kenya",
     "typescript",
+    "react-19",
     "mui",
     "strapi",
-    "cpanel"
+    "langgraph",
+    "nvidia-nim",
+    "cpanel",
+    "docker"
   ],
-  "author": "",
-  "license": "ISC"
+  "author": "BK Group Kenya",
+  "license": "MIT"
 }
