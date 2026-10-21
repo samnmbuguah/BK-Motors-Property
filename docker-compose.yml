@@ -32,6 +32,21 @@ services:
     networks:
       - caddy_default
 
+  bk-ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: bk-ai-service
+    restart: unless-stopped
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - STRAPI_API_URL=${STRAPI_API_URL:-http://bk-strapi-api:1337}
+      - STRAPI_PUBLIC_URL=${STRAPI_PUBLIC_URL:-https://bkapi.169-58-102-217.sslip.io}
+      - NVIDIA_MODEL=${NVIDIA_MODEL:-meta/llama-3.2-11b-vision-instruct}
+    networks:
+      - caddy_default
+
 networks:
   caddy_default:
     external: true

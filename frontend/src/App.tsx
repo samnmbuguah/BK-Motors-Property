@@ -32,6 +32,7 @@ import { PortalSwitcher } from './shared/components/PortalSwitcher';
 import { WhatsAppButton } from './shared/components/WhatsAppButton';
 import { AuthModal } from './shared/components/AuthModal';
 import { ClientDashboard } from './shared/components/ClientDashboard';
+import { AiAssistantWidget } from './shared/components/AiAssistantWidget';
 
 export const App: React.FC = () => {
   // Determine target portal based on build flags, domain name, or local state
@@ -95,6 +96,7 @@ export const App: React.FC = () => {
 
             <BrowserRouter>
               <AuthModal portal={activePortal} />
+              <AiAssistantWidget portal={activePortal} />
 
               {activePortal === 'motors' ? (
                 // BK MOTORS APP

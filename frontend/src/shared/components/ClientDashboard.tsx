@@ -36,13 +36,15 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { formatPrice } from '../utils/formatters';
 import { MOCK_CARS, MOCK_PROPERTIES } from '../services/mockData';
-import { Car, Property } from '../types';
+import { Car, Property, InquiryItem } from '../types';
+import { AiOutreachDrawer } from './AiOutreachDrawer';
 
 interface ClientDashboardProps {
   portal: 'motors' | 'properties';
@@ -55,6 +57,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(0);
+  const [selectedInquiryForAi, setSelectedInquiryForAi] = useState<InquiryItem | null>(null);
 
   const isMotors = portal === 'motors';
   const primaryColor = isMotors ? '#D97706' : '#059669';
@@ -397,15 +400,26 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
                             </TableCell>
                             <TableCell>{getStatusChip(inq.status)}</TableCell>
                             <TableCell align="right">
-                              <Tooltip title="Direct WhatsApp Follow-up">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleWhatsAppAgent(inq.itemTitle, inq.inquiryType)}
-                                  sx={{ color: '#25D366' }}
-                                >
-                                  <WhatsAppIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                                <Tooltip title="AI Sales Outreach & Call Script">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => setSelectedInquiryForAi(inq)}
+                                    sx={{ color: '#D97706', bgcolor: '#FEF3C7', '&:hover': { bgcolor: '#FDE68A' } }}
+                                  >
+                                    <AutoAwesomeIcon sx={{ fontSize: 16 }} />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Direct WhatsApp Follow-up">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleWhatsAppAgent(inq.itemTitle, inq.inquiryType)}
+                                    sx={{ color: '#25D366' }}
+                                  >
+                                    <WhatsAppIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -754,6 +768,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({ portal }) => {
           </Box>
         </Paper>
       </Container>
+
+      {/* AI Sales Outreach & Pitch Drawer */}
+      <AiOutreachDrawer
+        open={Boolean(selectedInquiryForAi)}
+        onClose={() => setSelectedInquiryForAi(null)}
+        inquiry={selectedInquiryForAi}
+        portal={portal}
+      />
     </Box>
   );
 };
