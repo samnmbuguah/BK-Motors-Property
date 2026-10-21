@@ -18,7 +18,8 @@
     "cms:dev": "npm --prefix cms run develop",
     "cms:build": "npm --prefix cms run build",
     "cms:start": "npm --prefix cms run start",
-    "ai:dev": "cd ai-service && uvicorn app.main:app --reload --port 8000"
+    "ai:dev": "cd ai-service && uvicorn app.main:app --reload --port 8000",
+    "test:e2e": "npm --prefix frontend run test:e2e"
   },
   "repository": {
     "type": "git",

@@ -93,6 +93,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
         {/* Favorite Button */}
         <IconButton
+          aria-label="Add to favorites"
           onClick={(e) => {
             e.stopPropagation();
             toggleFavoriteProperty(property.id);

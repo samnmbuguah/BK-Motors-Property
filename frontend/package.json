@@ -11,7 +11,10 @@
     "build:motors": "tsc -b && vite build --mode motors --outDir dist/motors",
     "build:properties": "tsc -b && vite build --mode properties --outDir dist/properties",
     "build:all": "npm run build:motors && npm run build:properties",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report playwright-report"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -25,6 +28,7 @@
     "react-router-dom": "^7.1.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

@@ -246,6 +246,7 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ portal }
                   <Tooltip title="View Official Receipt">
                     <IconButton
                       size="small"
+                      aria-label="View Official Receipt"
                       onClick={() => setSelectedReceipt(tx)}
                       sx={{ color: '#334155', bgcolor: '#F1F5F9' }}
                     >

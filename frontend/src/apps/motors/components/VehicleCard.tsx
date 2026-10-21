@@ -94,6 +94,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
 
         {/* Favorite Button */}
         <IconButton
+          aria-label="Add to favorites"
           onClick={(e) => {
             e.stopPropagation();
             toggleFavoriteCar(car.id);
