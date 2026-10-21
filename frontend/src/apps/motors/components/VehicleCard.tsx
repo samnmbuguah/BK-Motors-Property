@@ -1,0 +1,212 @@
+import React from 'react';
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
+  Chip,
+  Button,
+  Stack,
+  Divider,
+} from '@mui/material';
+import SpeedIcon from '@mui/icons-material/Speed';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import SettingsIcon from '@mui/icons-material/Settings';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { useNavigate } from 'react-router-dom';
+import { Car } from '../../../shared/types';
+import { formatPrice, formatMileage, createWhatsAppLink } from '../../../shared/utils/formatters';
+
+interface VehicleCardProps {
+  car: Car;
+}
+
+export const VehicleCard: React.FC<VehicleCardProps> = ({ car }) => {
+  const navigate = useNavigate();
+
+  const conditionColors: Record<string, { bg: string; text: string }> = {
+    'Foreign Used': { bg: '#EFF6FF', text: '#1D4ED8' },
+    'Locally Used': { bg: '#F0FDF4', text: '#15803D' },
+    'Brand New': { bg: '#FEF3C7', text: '#B45309' },
+    'In Transit': { bg: '#FDF2F8', text: '#BE185D' },
+  };
+
+  const badge = conditionColors[car.condition] || { bg: '#F1F5F9', text: '#475569' };
+
+  const whatsAppText = `Hello BK Motors, I am inquiring about the ${car.year} ${car.make} ${car.model} (Ref: ${car.refNumber}) listed at ${formatPrice(car.price, car.currency)}. Is it still available?`;
+  const whatsappUrl = createWhatsAppLink('+254700000000', whatsAppText);
+
+  return (
+    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      {/* Photo with Badges */}
+      <Box sx={{ position: 'relative', height: 210, overflow: 'hidden', bgcolor: '#0F172A' }}>
+        <CardMedia
+          component="img"
+          image={car.images[0] || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600'}
+          alt={car.title}
+          sx={{
+            height: '100%',
+            width: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease',
+            '&:hover': { transform: 'scale(1.05)' },
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate(`/vehicle/${car.slug}`)}
+        />
+        <Box sx={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 0.8 }}>
+          <Chip
+            label={car.condition}
+            size="small"
+            sx={{
+              bgcolor: badge.bg,
+              color: badge.text,
+              fontWeight: 700,
+              fontSize: '0.72rem',
+              borderRadius: 1,
+            }}
+          />
+          {car.featured && (
+            <Chip
+              label="FEATURED"
+              size="small"
+              sx={{
+                bgcolor: '#D97706',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                borderRadius: 1,
+              }}
+            />
+          )}
+        </Box>
+        <Chip
+          label={car.bodyType}
+          size="small"
+          sx={{
+            position: 'absolute',
+            bottom: 10,
+            right: 10,
+            bgcolor: 'rgba(15, 23, 42, 0.75)',
+            color: '#FFFFFF',
+            fontSize: '0.7rem',
+            backdropFilter: 'blur(4px)',
+          }}
+        />
+      </Box>
+
+      {/* Content */}
+      <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: '#D97706',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          {car.refNumber} • {car.year}
+        </Typography>
+
+        <Typography
+          variant="h6"
+          sx={{
+            fontSize: '1.05rem',
+            fontWeight: 700,
+            lineHeight: 1.3,
+            mt: 0.3,
+            mb: 1,
+            cursor: 'pointer',
+            display: '-webkit-box',
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            '&:hover': { color: '#D97706' },
+          }}
+          onClick={() => navigate(`/vehicle/${car.slug}`)}
+        >
+          {car.title}
+        </Typography>
+
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', mb: 1.5 }}>
+          {formatPrice(car.price, car.currency)}
+        </Typography>
+
+        {/* Specs Grid */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 1,
+            bgcolor: '#F8FAFC',
+            p: 1.2,
+            borderRadius: 1.5,
+            mb: 1.5,
+            fontSize: '0.78rem',
+            color: '#475569',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
+            <SpeedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />
+            <span>{formatMileage(car.mileage)}</span>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
+            <SettingsIcon sx={{ fontSize: 16, color: '#94A3B8' }} />
+            <span>{car.transmission}</span>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
+            <LocalGasStationIcon sx={{ fontSize: 16, color: '#94A3B8' }} />
+            <span>{car.fuelType} ({car.engineCC}cc)</span>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
+            <LocationOnIcon sx={{ fontSize: 16, color: '#94A3B8' }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {car.location.split(' ')[0]}
+            </span>
+          </Box>
+        </Box>
+
+        <Box sx={{ mt: 'auto' }}>
+          <Divider sx={{ mb: 1.5 }} />
+          <Stack direction="row" spacing={1}>
+            <Button
+              fullWidth
+              variant="outlined"
+              size="small"
+              onClick={() => navigate(`/vehicle/${car.slug}`)}
+              sx={{
+                borderColor: '#CBD5E1',
+                color: '#0F172A',
+                fontWeight: 600,
+                '&:hover': { borderColor: '#D97706', bgcolor: 'transparent' },
+              }}
+            >
+              Details
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                bgcolor: '#25D366',
+                color: '#FFFFFF',
+                px: 1.5,
+                minWidth: 'auto',
+                '&:hover': { bgcolor: '#1EBE5D' },
+              }}
+              title="Chat on WhatsApp"
+            >
+              <WhatsAppIcon sx={{ fontSize: 18 }} />
+            </Button>
+          </Stack>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};

@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inquiries",
+  "info": {
+    "singularName": "inquiry",
+    "pluralName": "inquiries",
+    "displayName": "Lead & Inquiry",
+    "description": "Leads, test drives, viewing bookings from both portals"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "customerName": {
+      "type": "string",
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email"
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "preferredContact": {
+      "type": "enumeration",
+      "enum": ["whatsapp", "call", "email"],
+      "default": "whatsapp"
+    },
+    "inquiryType": {
+      "type": "enumeration",
+      "enum": [
+        "car_purchase",
+        "test_drive",
+        "sell_car",
+        "property_viewing",
+        "property_inquiry"
+      ],
+      "default": "car_purchase"
+    },
+    "itemId": {
+      "type": "string"
+    },
+    "itemTitle": {
+      "type": "string"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["new", "in_progress", "contacted", "closed"],
+      "default": "new"
+    }
+  }
+}

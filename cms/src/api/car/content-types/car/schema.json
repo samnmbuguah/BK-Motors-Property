@@ -1,0 +1,120 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cars",
+  "info": {
+    "singularName": "car",
+    "pluralName": "cars",
+    "displayName": "Car Listing",
+    "description": "Automotive inventory for BK Motors"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "refNumber": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "make": {
+      "type": "string",
+      "required": true
+    },
+    "model": {
+      "type": "string",
+      "required": true
+    },
+    "year": {
+      "type": "integer",
+      "required": true
+    },
+    "trim": {
+      "type": "string"
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "currency": {
+      "type": "enumeration",
+      "enum": ["KES", "USD"],
+      "default": "KES"
+    },
+    "mileage": {
+      "type": "integer",
+      "required": true
+    },
+    "engineCC": {
+      "type": "integer"
+    },
+    "transmission": {
+      "type": "enumeration",
+      "enum": ["Automatic", "Manual"],
+      "default": "Automatic"
+    },
+    "fuelType": {
+      "type": "enumeration",
+      "enum": ["Petrol", "Diesel", "Hybrid", "Electric"],
+      "default": "Petrol"
+    },
+    "bodyType": {
+      "type": "enumeration",
+      "enum": ["SUV", "Sedan", "Hatchback", "Pickup", "Station Wagon", "Coupe", "Van"],
+      "default": "SUV"
+    },
+    "driveType": {
+      "type": "enumeration",
+      "enum": ["4WD", "AWD", "2WD", "FWD", "RWD"],
+      "default": "4WD"
+    },
+    "exteriorColor": {
+      "type": "string"
+    },
+    "interiorColor": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "enumeration",
+      "enum": ["Foreign Used", "Locally Used", "Brand New", "In Transit"],
+      "default": "Foreign Used"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["Available", "Reserved", "Sold"],
+      "default": "Available"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "description": {
+      "type": "text"
+    },
+    "features": {
+      "type": "json"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "location": {
+      "type": "string",
+      "default": "Nairobi, Kenya"
+    },
+    "vin": {
+      "type": "string"
+    }
+  }
+}

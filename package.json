@@ -1,0 +1,34 @@
+{
+  "name": "bk-motors-and-properties",
+  "version": "1.0.0",
+  "description": "Monorepo for BK Motors Dealership and BK Properties Real Estate with Strapi CMS",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "cms"
+  ],
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:motors": "npm --prefix frontend run dev:motors",
+    "dev:properties": "npm --prefix frontend run dev:properties",
+    "build:motors": "npm --prefix frontend run build:motors",
+    "build:properties": "npm --prefix frontend run build:properties",
+    "build:all": "npm --prefix frontend run build:all",
+    "preview": "npm --prefix frontend run preview",
+    "cms:dev": "npm --prefix cms run develop",
+    "cms:build": "npm --prefix cms run build",
+    "cms:start": "npm --prefix cms run start"
+  },
+  "keywords": [
+    "motors",
+    "dealership",
+    "real-estate",
+    "kenya",
+    "typescript",
+    "mui",
+    "strapi",
+    "cpanel"
+  ],
+  "author": "",
+  "license": "ISC"
+}

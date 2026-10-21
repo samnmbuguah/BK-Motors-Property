@@ -1,0 +1,93 @@
+{
+  "kind": "collectionType",
+  "collectionName": "properties",
+  "info": {
+    "singularName": "property",
+    "pluralName": "properties",
+    "displayName": "Property Listing",
+    "description": "Real estate listings for BK Properties"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "refNumber": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "propertyType": {
+      "type": "enumeration",
+      "enum": [
+        "Apartment",
+        "Villa",
+        "Townhouse",
+        "Mansion",
+        "Land/Plot",
+        "Commercial",
+        "Penthouse"
+      ],
+      "default": "Apartment"
+    },
+    "listingStatus": {
+      "type": "enumeration",
+      "enum": ["For Sale", "For Rent"],
+      "default": "For Sale"
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "currency": {
+      "type": "enumeration",
+      "enum": ["KES", "USD"],
+      "default": "KES"
+    },
+    "bedrooms": {
+      "type": "integer"
+    },
+    "bathrooms": {
+      "type": "decimal"
+    },
+    "areaSqFt": {
+      "type": "integer"
+    },
+    "parkingSpaces": {
+      "type": "integer"
+    },
+    "location": {
+      "type": "json"
+    },
+    "amenities": {
+      "type": "json"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "readyStatus": {
+      "type": "enumeration",
+      "enum": ["Ready", "Under Construction", "Off-Plan"],
+      "default": "Ready"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}
