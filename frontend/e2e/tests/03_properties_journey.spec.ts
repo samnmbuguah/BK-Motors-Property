@@ -29,5 +29,19 @@ test.describe('BK Properties & Land Journeys', () => {
 
     // Verify Mortgage Estimator
     await expect(page.locator('text=Mortgage Repayment Estimator')).toBeVisible();
+
+    // Verify interactive photo gallery and lightbox modal
+    const galleryExpandHint = page.locator('text=/Click to view all/i');
+    await expect(galleryExpandHint).toBeVisible();
+    await galleryExpandHint.click();
+
+    // Verify fullscreen lightbox modal opened
+    await expect(page.locator('text=Photo 1 of')).toBeVisible();
+    await page.getByRole('button', { name: 'Next photo in fullscreen' }).click();
+    await expect(page.locator('text=Photo 2 of')).toBeVisible();
+
+    // Close fullscreen lightbox
+    await page.getByRole('button', { name: 'Close fullscreen gallery' }).click();
+    await expect(page.locator('text=Photo 2 of')).not.toBeVisible();
   });
 });

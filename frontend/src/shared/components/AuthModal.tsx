@@ -211,6 +211,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setIdentifier(e.target.value)}
               margin="normal"
               required
+              autoComplete="username"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -229,6 +230,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              autoComplete="current-password"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -241,6 +243,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                       size="small"
+                      aria-label="toggle password visibility"
                     >
                       {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                     </IconButton>
@@ -317,6 +320,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setUsername(e.target.value)}
               margin="normal"
               required
+              autoComplete="username"
               placeholder="e.g. David Mwangi"
               InputProps={{
                 startAdornment: (
@@ -336,6 +340,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
+              autoComplete="email"
               placeholder="e.g. client@example.com"
               InputProps={{
                 startAdornment: (
@@ -355,6 +360,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              autoComplete="new-password"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -367,6 +373,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                       size="small"
+                      aria-label="toggle password visibility"
                     >
                       {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                     </IconButton>
@@ -384,6 +391,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ portal = 'motors' }) => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               margin="normal"
               required
+              autoComplete="new-password"
             />
 
             <Button

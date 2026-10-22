@@ -41,6 +41,7 @@ import { createWhatsAppLink, calculateMonthlyPayment } from '../../../shared/uti
 import { useCurrency } from '../../../shared/context/CurrencyContext';
 import { useFavorites } from '../../../shared/context/FavoritesContext';
 import { InquiryModal } from '../../../shared/components/InquiryModal';
+import { MediaGallery } from '../../../shared/components/MediaGallery';
 
 export const PropertyDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -166,44 +167,12 @@ export const PropertyDetailPage: React.FC = () => {
         <Grid container spacing={4} sx={{ mb: 5 }}>
           {/* Main Gallery */}
           <Grid item xs={12} md={7.5}>
-            <Card sx={{ borderRadius: 3, overflow: 'hidden', mb: 2, bgcolor: '#0F172A' }}>
-              <Box
-                component="img"
-                src={property.images[activeImageIndex] || property.images[0]}
-                alt={property.title}
-                sx={{
-                  width: '100%',
-                  height: { xs: 280, sm: 440 },
-                  objectFit: 'cover',
-                }}
-              />
-            </Card>
-
-            {/* Thumbnail Strip */}
-            {property.images.length > 1 && (
-              <Stack direction="row" spacing={1.5} sx={{ overflowX: 'auto', pb: 1 }}>
-                {property.images.map((img, idx) => (
-                  <Box
-                    key={idx}
-                    component="img"
-                    src={img}
-                    alt={`Thumbnail ${idx + 1}`}
-                    onClick={() => setActiveImageIndex(idx)}
-                    sx={{
-                      width: 90,
-                      height: 65,
-                      borderRadius: 1.5,
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      border: activeImageIndex === idx ? '3px solid #0D9488' : '2px solid transparent',
-                      opacity: activeImageIndex === idx ? 1 : 0.7,
-                      transition: 'all 0.2s ease',
-                      '&:hover': { opacity: 1 },
-                    }}
-                  />
-                ))}
-              </Stack>
-            )}
+            <MediaGallery
+              images={property.images}
+              title={property.title}
+              accentColor="#0D9488"
+              badgeText={`${property.propertyType} • ${property.listingStatus}`}
+            />
 
             {/* Context-Aware Key Specs Row */}
             {isLand ? (
